@@ -35,7 +35,7 @@ class Model():
       W = np.transpose(W_init, (2, 3, 1, 0))
 
       layer['weights'] = W
-      layer['bias'] = b
+      layer['biases'] = b
 
       layers[layer_name] = layer
 
