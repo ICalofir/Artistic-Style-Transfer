@@ -185,6 +185,4 @@ class VGG19():
         net = tf.contrib.layers.max_pool2d(net, 2)
         layers['pool5'] = net
 
-      print(net.shape)
-
     return net, layers
