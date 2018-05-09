@@ -3,34 +3,139 @@ import tensorflow as tf
 import numpy as np
 
 from conv_nets.vgg19 import VGG19
+from utils import Utils
 
 class StyleTransfer():
   def __init__(self,
-      img_height=224,
-      img_width=224,
-      img_channels=3):
+      model_name='vgg19',
+      content_img_height=224,
+      content_img_width=224,
+      content_img_channels=3,
+      style_img_height=224,
+      style_img_width=224,
+      style_img_channels=3,
+      noise_img_height=224,
+      noise_img_width=224,
+      noise_img_channels=3,
+      content_layers=[],
+      style_layers=[],
+      style_layers_w=[],
+      alfa=1,
+      beta=1,
+      learning_rate=2,
+      num_iters=1000):
+    self.model_name = model_name
 
-    self.model = VGG19()
-    self.img_height = img_height
-    self.img_width = img_width
-    self.img_channels = img_channels
+    self.content_img_height = content_img_height
+    self.content_img_width = content_img_width
+    self.content_img_channels = content_img_channels
+    self.style_img_height = style_img_height
+    self.style_img_width = style_img_width
+    self.style_img_channels = style_img_channels
+    self.noise_img_height = noise_img_height
+    self.noise_img_width = noise_img_width
+    self.noise_img_channels = noise_img_channels
+
+    self.content_layers = content_layers
+    self.style_layers = style_layers
+    self.style_layers_w = style_layers_w
+    self.alfa = alfa
+    self.beta = beta
+
+    self.learning_rate = learning_rate
+    self.num_iters = num_iters
+
+  def _get_content_loss(self):
+    content_loss = tf.constant(0.0)
+    for content_layer_name in self.content_layers:
+      content_loss = content_loss \
+                     + tf.reduce_sum(tf.square(
+                        self.content_img_layers[content_layer_name] \
+                        - self.noise_img_layers[content_layer_name]))
+    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
+
+    return content_loss
+
+  def _get_style_loss(self):
+    style_loss = tf.constant(0.0)
+    for i, style_layer_name in enumerate(self.style_layers):
+      channels_matrix_style_img = tf.reshape(self.style_img_layers[style_layer_name],
+                    [-1, tf.shape(self.style_img_layers[style_layer_name])[3]])
+      channels_matrix_noise_img = tf.reshape(self.noise_img_layers[style_layer_name],
+                    [-1, tf.shape(self.noise_img_layers[style_layer_name])[3]])
+
+      gram_matrix_style = tf.matmul(tf.transpose(channels_matrix_style_img),
+                            channels_matrix_style_img)
+      gram_matrix_noise = tf.matmul(tf.transpose(channels_matrix_noise_img),
+                            channels_matrix_noise_img)
+
+      El = tf.reduce_sum(tf.square(gram_matrix_style - gram_matrix_noise))
+      El = tf.scalar_mul(1.0 / (4.0
+                         * tf.cast(tf.shape(self.style_img_layers[style_layer_name])[1],
+                                   tf.float32)
+                         * tf.cast(tf.shape(self.style_img_layers[style_layer_name])[2],
+                                   tf.float32)
+                         * tf.cast(tf.shape(self.style_img_layers[style_layer_name])[3],
+                                   tf.float32)),
+                         El)
+      style_loss = style_loss + tf.scalar_mul(self.style_layers_w[i], El)
+
+    return style_loss
 
   def build(self):
     tf.reset_default_graph()
 
-    self.x = tf.placeholder(tf.float32, [None, self.img_height,
-                self.img_width, self.img_channels])
+    if self.model_name == 'vgg19':
+      self.model = VGG19()
+      self.noise_img_init = tf.truncated_normal(shape=[1,
+                                                       self.noise_img_height,
+                                                       self.noise_img_width,
+                                                       self.noise_img_channels],
+                                                mean=0.0,
+                                                stddev=57.39)
+    self.content_img = tf.placeholder(tf.float32, [None, self.content_img_height,
+                self.content_img_width, self.content_img_channels])
+    self.style_img = tf.placeholder(tf.float32, [None, self.style_img_height,
+                self.style_img_width, self.style_img_channels])
 
-    self.out, self.layers = self.model.run(self.x)
+    self.noise_img = tf.get_variable(name='output_image',
+      initializer=self.noise_img_init)
+
+    _, self.content_img_layers = self.model.run(self.content_img)
+    _, self.style_img_layers = self.model.run(self.style_img)
+    _, self.noise_img_layers = self.model.run(self.noise_img)
+
+    self.content_loss = self._get_content_loss()
+    self.style_loss = self._get_style_loss()
+    self.content_loss = self.alfa * self.content_loss
+    self.style_loss = self.beta * self.style_loss
+    self.total_loss = self.content_loss + self.style_loss
+
+    var_list = tf.trainable_variables()
+    self.var_list = [var for var in var_list if 'output_image' in var.name]
+
+    self.optim = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
+        name='adam_optimizer').minimize(self.total_loss, var_list=self.var_list)
 
   def train(self):
     with tf.Session() as sess:
       sess.run(tf.global_variables_initializer())
+      ut = Utils()
 
-      img = cv2.imread('lena.jpg')
-      img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-      img = np.reshape(img, (1, 224, 224, 3))
+      content_img = np.reshape(ut.get_img('content.jpg'), (1, 224, 224, 3))
+      style_img = np.reshape(ut.get_img('style.jpg'), (1, 224, 224, 3))
 
-      img_r, layer = sess.run([self.out, self.layers], feed_dict={self.x: img})
-      # print(img_r)
-      print(layer['conv1_1'])
+      for i in range(self.num_iters):
+        print('it: ', i)
+
+        _, content_loss, style_loss, out_loss, out_img =  sess.run(
+              [self.optim, self.content_loss, self.style_loss, self.total_loss, self.noise_img],
+              feed_dict={self.content_img: content_img,
+                         self.style_img: style_img})
+
+        print('Content loss: ', content_loss)
+        print('Style loss: ', style_loss)
+        print('Total loss: ', out_loss)
+
+        if i % 10 == 0:
+          ut.save_img(ut.denormalize_img(out_img[0]), 'images/img' + str(i) + '.jpg')
