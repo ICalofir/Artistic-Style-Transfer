@@ -1,1 +1,3 @@
 style transfer - https://www.coursera.org/learn/convolutional-neural-networks/home/week/4
+               - https://www.coursera.org/learn/convolutional-neural-networks/lecture/SA5H8/what-is-neural-style-transfer
+	       - https://www.coursera.org/learn/convolutional-neural-networks/notebook/lEthw/art-generation-with-neural-style-transfer
