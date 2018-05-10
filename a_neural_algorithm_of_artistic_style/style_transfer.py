@@ -45,24 +45,32 @@ class StyleTransfer():
     self.learning_rate = learning_rate
     self.num_iters = num_iters
 
-  def _get_content_loss(self):
+  def _get_content_loss(self, content_img_layers, noise_img_layers):
     content_loss = tf.constant(0.0)
     for content_layer_name in self.content_layers:
       content_loss = content_loss \
                      + tf.reduce_sum(tf.square(
-                        self.content_img_layers[content_layer_name] \
-                        - self.noise_img_layers[content_layer_name]))
-    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
+                        content_img_layers[content_layer_name] \
+                        - noise_img_layers[content_layer_name]))
+    content_loss = tf.scalar_mul(1.0 / (2.0
+                                 * tf.cast(tf.shape(content_img_layers[content_layer_name])[1],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_img_layers[content_layer_name])[2],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_img_layers[content_layer_name])[3],
+                                           tf.float32)),
+                                 content_loss)
 
     return content_loss
 
-  def _get_style_loss(self):
+  def _get_style_loss(self, style_img_layers, noise_img_layers):
     style_loss = tf.constant(0.0)
+
     for i, style_layer_name in enumerate(self.style_layers):
-      channels_matrix_style_img = tf.reshape(self.style_img_layers[style_layer_name],
-                    [-1, tf.shape(self.style_img_layers[style_layer_name])[3]])
-      channels_matrix_noise_img = tf.reshape(self.noise_img_layers[style_layer_name],
-                    [-1, tf.shape(self.noise_img_layers[style_layer_name])[3]])
+      channels_matrix_style_img = tf.reshape(style_img_layers[style_layer_name],
+                    [-1, tf.shape(style_img_layers[style_layer_name])[3]])
+      channels_matrix_noise_img = tf.reshape(noise_img_layers[style_layer_name],
+                    [-1, tf.shape(noise_img_layers[style_layer_name])[3]])
 
       gram_matrix_style = tf.matmul(tf.transpose(channels_matrix_style_img),
                             channels_matrix_style_img)
@@ -71,12 +79,12 @@ class StyleTransfer():
 
       El = tf.reduce_sum(tf.square(gram_matrix_style - gram_matrix_noise))
       El = tf.scalar_mul(1.0 / (4.0
-                         * tf.cast(tf.shape(self.style_img_layers[style_layer_name])[1],
-                                   tf.float32)
-                         * tf.cast(tf.shape(self.style_img_layers[style_layer_name])[2],
-                                   tf.float32)
-                         * tf.cast(tf.shape(self.style_img_layers[style_layer_name])[3],
-                                   tf.float32)),
+                         * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[1],
+                                             tf.float32))
+                         * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[2],
+                                             tf.float32))
+                         * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[3],
+                                             tf.float32))),
                          El)
       style_loss = style_loss + tf.scalar_mul(self.style_layers_w[i], El)
 
@@ -100,16 +108,22 @@ class StyleTransfer():
 
     self.noise_img = tf.get_variable(name='output_image',
       initializer=self.noise_img_init)
+    tf.summary.histogram("noise_img", self.noise_img)
+    tf.summary.image('noise_img', self.noise_img)
 
     _, self.content_img_layers = self.model.run(self.content_img)
     _, self.style_img_layers = self.model.run(self.style_img)
     _, self.noise_img_layers = self.model.run(self.noise_img)
 
-    self.content_loss = self._get_content_loss()
-    self.style_loss = self._get_style_loss()
-    self.content_loss = self.alfa * self.content_loss
-    self.style_loss = self.beta * self.style_loss
-    self.total_loss = self.content_loss + self.style_loss
+    self.content_loss = self._get_content_loss(self.content_img_layers,
+                                               self.noise_img_layers)
+    self.style_loss = self._get_style_loss(self.style_img_layers,
+                                           self.noise_img_layers)
+    self.total_loss = self.alfa * self.content_loss + self.beta * self.style_loss
+
+    tf.summary.scalar('content_loss', self.content_loss)
+    tf.summary.scalar('style_loss', self.style_loss)
+    tf.summary.scalar('total_loss', self.total_loss)
 
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'output_image' in var.name]
@@ -118,24 +132,33 @@ class StyleTransfer():
         name='adam_optimizer').minimize(self.total_loss, var_list=self.var_list)
 
   def train(self):
+    summ = tf.summary.merge_all()
     with tf.Session() as sess:
       sess.run(tf.global_variables_initializer())
+
+      writer = tf.summary.FileWriter('tensorboard')
       ut = Utils()
+
+      writer.add_graph(sess.graph)
 
       content_img = np.reshape(ut.get_img('content.jpg'), (1, 224, 224, 3))
       style_img = np.reshape(ut.get_img('style.jpg'), (1, 224, 224, 3))
 
       for i in range(self.num_iters):
-        print('it: ', i)
-
         _, content_loss, style_loss, out_loss, out_img =  sess.run(
               [self.optim, self.content_loss, self.style_loss, self.total_loss, self.noise_img],
               feed_dict={self.content_img: content_img,
                          self.style_img: style_img})
 
+        print('it: ', i)
         print('Content loss: ', content_loss)
         print('Style loss: ', style_loss)
         print('Total loss: ', out_loss)
 
         if i % 10 == 0:
           ut.save_img(ut.denormalize_img(out_img[0]), 'images/img' + str(i) + '.jpg')
+
+          s = sess.run(summ,
+                       feed_dict={self.content_img: content_img,
+                                  self.style_img: style_img})
+          writer.add_summary(s, i)

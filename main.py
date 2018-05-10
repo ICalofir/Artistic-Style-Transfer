@@ -1,4 +1,4 @@
-from style_transfer import StyleTransfer
+from a_neural_algorithm_of_artistic_style.style_transfer import StyleTransfer
 
 if __name__ == '__main__':
   model = StyleTransfer(content_layers=['conv4_2'],
