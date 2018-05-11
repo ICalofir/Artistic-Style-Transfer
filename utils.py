@@ -8,54 +8,51 @@ class Utils():
     self.ds = Dataset()
     self.vgg_means = [103.939, 116.779, 123.68] # BGR
 
-  def next_batch_train(self, n_batch=None, model='vgg'):
+  def next_batch_train(self, n_batch=None, width=257, height=257, model='vgg'):
     x_batch = []
 
     x_train, batch_end = self.ds.get_train_batch(n_batch)
     for x in x_train:
-      x_img = self.get_img(x, model=model)
+      x_img = self.get_img(x, width=width, height=height, model=model)
       x_batch.append(x_img)
 
     x_batch = np.array(x_batch)
 
     return x_batch.astype(np.float32), batch_end
 
-  def next_batch_val(self, n_batch=None, model='vgg'):
+  def next_batch_val(self, n_batch=None, width=257, height=257, model='vgg'):
     x_batch = []
 
     x_val, batch_end = self.ds.get_val_batch(n_batch)
     for x in x_train:
-      x_img = self.get_img(x, model=model)
+      x_img = self.get_img(x, width=width, height=height, model=model)
       x_batch.append(x_img)
 
     x_batch = np.array(x_batch)
 
     return x_batch.astype(np.float32), batch_end
 
-  def next_batch_test(self, n_batch=None, model='vgg'):
+  def next_batch_test(self, n_batch=None, width=257, height=257, model='vgg'):
     x_batch = []
 
     x_test, batch_end = self.ds.get_test_batch(n_batch)
     for x in x_train:
-      x_img = self.get_img(x, model=model)
+      x_img = self.get_img(x, width=width, height=height, model=model)
       x_batch.append(x_img)
 
     x_batch = np.array(x_batch)
 
     return x_batch.astype(np.float32), batch_end
 
-  def get_img(self, img_name, model='vgg'):
+  def get_img(self, img_name, width=257, height=257, model='vgg'):
     img = cv2.imread(img_name)
-
-    if model == 'transform_net':
-      img = self.resize_img(img, 256, 256)
-
+    img = self.resize_img(img, width, height)
     img = self.normalize_img(img, model)
 
     return img
 
   def resize_img(self, img, width, height):
-    img = cv2.resize(img, (width, height)) 
+    img = cv2.resize(img, (width, height))
 
     return img
 
