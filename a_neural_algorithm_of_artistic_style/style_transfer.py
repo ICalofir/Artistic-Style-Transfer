@@ -52,14 +52,14 @@ class StyleTransfer():
                      + tf.reduce_sum(tf.square(
                         content_img_layers[content_layer_name] \
                         - noise_img_layers[content_layer_name]))
-    content_loss = tf.scalar_mul(1.0 / (2.0
-                                 * tf.cast(tf.shape(content_img_layers[content_layer_name])[1],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_img_layers[content_layer_name])[2],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_img_layers[content_layer_name])[3],
-                                           tf.float32)),
-                                 content_loss)
+      content_loss = tf.scalar_mul(1.0 / (2.0
+                                   * tf.cast(tf.shape(content_img_layers[content_layer_name])[1],
+                                             tf.float32)
+                                   * tf.cast(tf.shape(content_img_layers[content_layer_name])[2],
+                                             tf.float32)
+                                   * tf.cast(tf.shape(content_img_layers[content_layer_name])[3],
+                                             tf.float32)),
+                                   content_loss)
 
     return content_loss
 
@@ -141,8 +141,8 @@ class StyleTransfer():
 
       writer.add_graph(sess.graph)
 
-      content_img = np.reshape(ut.get_img('content.jpg'), (1, 224, 224, 3))
-      style_img = np.reshape(ut.get_img('style.jpg'), (1, 224, 224, 3))
+      content_img = np.reshape(ut.get_img('content.jpg', width=224, height=224), (1, 224, 224, 3))
+      style_img = np.reshape(ut.get_img('style.jpg', width=224, height=224), (1, 224, 224, 3))
 
       for i in range(self.num_iters):
         _, content_loss, style_loss, out_loss, out_img =  sess.run(
