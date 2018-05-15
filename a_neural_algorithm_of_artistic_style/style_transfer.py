@@ -141,8 +141,8 @@ class StyleTransfer():
 
       writer.add_graph(sess.graph)
 
-      content_img = np.reshape(ut.get_img('content.jpg', width=224, height=224), (1, 224, 224, 3))
-      style_img = np.reshape(ut.get_img('style.jpg', width=224, height=224), (1, 224, 224, 3))
+      content_img = np.reshape(ut.get_img('micul_print.jpg', width=224, height=224), (1, 224, 224, 3))
+      style_img = np.reshape(ut.get_img('starry_night.jpg', width=224, height=224), (1, 224, 224, 3))
 
       for i in range(self.num_iters):
         _, content_loss, style_loss, out_loss, out_img =  sess.run(

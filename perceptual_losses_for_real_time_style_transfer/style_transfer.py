@@ -140,7 +140,7 @@ class StyleTransfer():
 
       y_batch = []
       for _ in range(self.batch_size):
-        y_batch.append(ut.get_img('style.jpg', width=256, height=256))
+        y_batch.append(ut.get_img('starry_night.jpg', width=256, height=256))
       y_batch = np.array(y_batch).astype(np.float32)
 
       ep = 0
