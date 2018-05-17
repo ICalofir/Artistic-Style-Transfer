@@ -5,7 +5,7 @@ addpath gaimc/
 N = 1;
 
 for i = 1:N
-    prefix = '../../starry_night';
+    prefix = '../../ionut_resized';
     in_name = [prefix '.jpg'];
 
     input = im2double(imread(in_name));
@@ -23,5 +23,6 @@ for i = 1:N
     Aj = ci;
     Aval = ai;
     CSR = [Ai, Aj, Aval];
-    save(['Input_Laplacian_3x3_1e-7_CSR' int2str(i) '.mat'], 'CSR');
+    % save(['Input_Laplacian_3x3_1e-7_CSR' int2str(i) '.mat'], 'CSR'); % save -6 laplacian.mat CSR
+    save -6 ['Input_Laplacian_3x3_1e-7_CSR' int2str(i) '.mat'] CSR
 end
