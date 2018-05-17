@@ -23,6 +23,5 @@ for i = 1:N
     Aj = ci;
     Aval = ai;
     CSR = [Ai, Aj, Aval];
-    % save(['Input_Laplacian_3x3_1e-7_CSR' int2str(i) '.mat'], 'CSR'); % save -6 laplacian.mat CSR
-    save -6 ['Input_Laplacian_3x3_1e-7_CSR' int2str(i) '.mat'] CSR
+    save('-v6', ['Input_Laplacian_3x3_1e-7_CSR' int2str(i) '.mat'], 'CSR'); % save -6 laplacian.mat CSR
 end
