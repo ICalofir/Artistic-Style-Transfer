@@ -131,7 +131,10 @@ class StyleTransfer():
     self.optim = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
         name='adam_optimizer').minimize(self.total_loss, var_list=self.var_list)
 
-  def train(self):
+  def train(self,
+            content_img_path,
+            style_img_path,
+            save_img_path):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       sess.run(tf.global_variables_initializer())
@@ -141,8 +144,20 @@ class StyleTransfer():
 
       writer.add_graph(sess.graph)
 
-      content_img = np.reshape(ut.get_img('micul_print.jpg', width=224, height=224), (1, 224, 224, 3))
-      style_img = np.reshape(ut.get_img('starry_night.jpg', width=224, height=224), (1, 224, 224, 3))
+      content_img = np.reshape(ut.get_img(content_img_path,
+                                          width=self.content_img_width,
+                                          height=self.content_img_height),
+                                          (1,
+                                           self.content_img_height,
+                                           self.content_img_width,
+                                           self.content_img_channels))
+      style_img = np.reshape(ut.get_img(style_img_path,
+                                        width=self.style_img_width,
+                                        height=self.style_img_height),
+                                        (1,
+                                         self.style_img_height,
+                                         self.style_img_width,
+                                         self.style_img_channels))
 
       for i in range(self.num_iters):
         _, content_loss, style_loss, out_loss, out_img =  sess.run(
@@ -156,7 +171,7 @@ class StyleTransfer():
         print('Total loss: ', out_loss)
 
         if i % 10 == 0:
-          ut.save_img(ut.denormalize_img(out_img[0]), 'images/img' + str(i) + '.jpg')
+          ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.jpg')
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
