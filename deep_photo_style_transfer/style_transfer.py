@@ -119,68 +119,65 @@ class StyleTransfer():
 
     return indices, values, shape
 
-  def _get_content_loss(self, content_img_layers, noise_img_layers):
+  def _get_content_loss(self, content_layer, noise_layer):
     content_loss = tf.constant(0.0)
-    for content_layer_name in self.content_layers:
-      content_loss = content_loss \
-                     + tf.reduce_sum(tf.square(
-                        content_img_layers[content_layer_name] \
-                        - noise_img_layers[content_layer_name]))
-      content_loss = tf.scalar_mul(1.0 / (2.0
-                                   * tf.cast(tf.shape(content_img_layers[content_layer_name])[1],
-                                             tf.float32)
-                                   * tf.cast(tf.shape(content_img_layers[content_layer_name])[2],
-                                             tf.float32)
-                                   * tf.cast(tf.shape(content_img_layers[content_layer_name])[3],
-                                             tf.float32)),
-                                   content_loss)
+    content_loss = content_loss \
+                   + tf.reduce_sum(tf.square(content_layer \
+                                             - noise_layer))
+    content_loss = tf.scalar_mul(1.0 / (2.0
+                                 * tf.cast(tf.shape(content_layer)[1],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[2],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[3],
+                                           tf.float32)),
+                                 content_loss)
 
     return content_loss
 
-  def _get_style_loss(self, style_img_layers, noise_img_layers,
+  def _get_style_loss(self, style_layer, noise_layer,
                             mask_style_img, mask_content_img):
     style_loss = tf.constant(0.0)
 
-    for i, style_layer_name in enumerate(self.style_layers):
-      sz = tf.constant([style_img_layers[style_layer_name].get_shape().as_list()[1],
-                        style_img_layers[style_layer_name].get_shape().as_list()[2]])
-      style_img = tf.image.resize_images(mask_style_img, sz)
-      sz = tf.constant([noise_img_layers[style_layer_name].get_shape().as_list()[1],
-                        noise_img_layers[style_layer_name].get_shape().as_list()[2]])
-      content_img = tf.image.resize_images(mask_content_img, sz)
-      for c in range(self.mask_channels):
-        mask_matrix_style_img = tf.multiply(style_img_layers[style_layer_name],
-                                            tf.reshape(style_img[:, :, :, c],
-                                                       [tf.shape(style_img)[0],
-                                                        tf.shape(style_img)[1],
-                                                        tf.shape(style_img)[2],
-                                                        1]))
-        mask_matrix_noise_img = tf.multiply(noise_img_layers[style_layer_name],
-                                            tf.reshape(content_img[:, :, :, c],
-                                                       [tf.shape(content_img)[0],
-                                                        tf.shape(content_img)[1],
-                                                        tf.shape(content_img)[2],
-                                                        1]))
-        channels_matrix_style_img = tf.reshape(mask_matrix_style_img,
-                                               [-1, tf.shape(mask_matrix_style_img)[3]])
-        channels_matrix_noise_img = tf.reshape(mask_matrix_noise_img,
-                                               [-1, tf.shape(mask_matrix_noise_img)[3]])
+    sz = tf.constant([style_layer.get_shape().as_list()[1],
+                      style_layer.get_shape().as_list()[2]])
+    style_img = tf.image.resize_images(mask_style_img, sz)
+    sz = tf.constant([noise_layer.get_shape().as_list()[1],
+                      noise_layer.get_shape().as_list()[2]])
+    content_img = tf.image.resize_images(mask_content_img, sz)
+    for c in range(self.mask_channels):
+      mask_matrix_style_img = tf.multiply(style_layer,
+                                          tf.reshape(style_img[:, :, :, c],
+                                                     [tf.shape(style_img)[0],
+                                                      tf.shape(style_img)[1],
+                                                      tf.shape(style_img)[2],
+                                                      1]))
+      mask_matrix_noise_img = tf.multiply(noise_layer,
+                                          tf.reshape(content_img[:, :, :, c],
+                                                     [tf.shape(content_img)[0],
+                                                      tf.shape(content_img)[1],
+                                                      tf.shape(content_img)[2],
+                                                      1]))
+      channels_matrix_style_img = tf.reshape(mask_matrix_style_img,
+                                             [-1, tf.shape(mask_matrix_style_img)[3]])
+      channels_matrix_noise_img = tf.reshape(mask_matrix_noise_img,
+                                             [-1, tf.shape(mask_matrix_noise_img)[3]])
 
-        gram_matrix_style = tf.matmul(tf.transpose(channels_matrix_style_img),
-                              channels_matrix_style_img)
-        gram_matrix_noise = tf.matmul(tf.transpose(channels_matrix_noise_img),
-                              channels_matrix_noise_img)
+      gram_matrix_style = tf.matmul(tf.transpose(channels_matrix_style_img),
+                                    channels_matrix_style_img)
+      gram_matrix_noise = tf.matmul(tf.transpose(channels_matrix_noise_img),
+                                    channels_matrix_noise_img)
 
-        El = tf.reduce_sum(tf.square(gram_matrix_style - gram_matrix_noise))
-        El = tf.scalar_mul(1.0 / (4.0
-                           * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[1],
-                                               tf.float32))
-                           * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[2],
-                                               tf.float32))
-                           * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[3],
-                                               tf.float32))),
-                           El)
-        style_loss = style_loss + tf.scalar_mul(self.style_layers_w[i], El)
+      El = tf.reduce_sum(tf.square(gram_matrix_style - gram_matrix_noise))
+      El = tf.scalar_mul(1.0 / (4.0
+                         * tf.square(tf.cast(tf.shape(style_layer)[1],
+                                             tf.float32))
+                         * tf.square(tf.cast(tf.shape(style_layer)[2],
+                                             tf.float32))
+                         * tf.square(tf.cast(tf.shape(style_layer)[3],
+                                             tf.float32))),
+                         El)
+      style_loss = style_loss + El
 
     return style_loss
 
@@ -224,16 +221,23 @@ class StyleTransfer():
     tf.summary.histogram("noise_img", self.noise_img)
     tf.summary.image('noise_img', self.noise_img)
 
-    _, self.content_img_layers = self.model.run(self.content_img)
-    _, self.style_img_layers = self.model.run(self.style_img)
-    _, self.noise_img_layers = self.model.run(self.noise_img)
+    self.content_loss = tf.constant(0.0)
+    for content_layer_name in self.content_layers:
+      content_layer = self.model.run(self.content_img, content_layer_name)
+      noise_layer = self.model.run(self.noise_img, content_layer_name)
+      self.content_loss = self.content_loss \
+                          + self._get_content_loss(content_layer, noise_layer)
 
-    self.content_loss = self._get_content_loss(self.content_img_layers,
-                                               self.noise_img_layers)
-    self.style_loss = self._get_style_loss(self.style_img_layers,
-                                           self.noise_img_layers,
-                                           self.mask_style_img,
-                                           self.mask_content_img)
+    self.style_loss = tf.constant(0.0)
+    for i, style_layer_name in enumerate(self.style_layers):
+      style_layer = self.model.run(self.style_img, style_layer_name)
+      noise_layer = self.model.run(self.noise_img, style_layer_name)
+      self.style_loss = self.style_loss \
+                          + tf.scalar_mul(self.style_layers_w[i],
+                                self._get_style_loss(style_layer, noise_layer,
+                                                     self.mask_style_img,
+                                                     self.mask_content_img))
+
     self.photorealism_loss = self._get_photorealism_loss(self.laplacian_matrix,
                                                          self.noise_img)
     self.total_loss = self.alfa * self.content_loss \
@@ -251,7 +255,13 @@ class StyleTransfer():
     self.optim = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
         name='adam_optimizer').minimize(self.total_loss, var_list=self.var_list)
 
-  def train(self):
+  def train(self,
+            content_img_path,
+            style_img_path,
+            mask_content_img_path,
+            mask_style_img_path,
+            laplacian_matrix_path,
+            save_img_path):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       sess.run(tf.global_variables_initializer())
@@ -261,15 +271,28 @@ class StyleTransfer():
 
       writer.add_graph(sess.graph)
 
-      content_img = np.reshape(ut.get_img('ionut.jpg', width=224, height=224), (1, 224, 224, 3))
-      style_img = np.reshape(ut.get_img('micul_print.jpg', width=224, height=224), (1, 224, 224, 3))
-      mask_content_img = self._get_mask_img('ionut_mask_resized.jpg')
+      content_img = np.reshape(ut.get_img(content_img_path,
+                                          width=self.content_img_width,
+                                          height=self.content_img_height),
+                                          (1,
+                                           self.content_img_height,
+                                           self.content_img_width,
+                                           self.content_img_channels))
+      style_img = np.reshape(ut.get_img(style_img_path,
+                                        width=self.style_img_width,
+                                        height=self.style_img_height),
+                                        (1,
+                                         self.style_img_height,
+                                         self.style_img_width,
+                                         self.style_img_channels))
+
+      mask_content_img = self._get_mask_img(mask_content_img_path)
       mask_content_img = np.reshape(mask_content_img,
                                     (1,
                                      mask_content_img.shape[0],
                                      mask_content_img.shape[1],
                                      mask_content_img.shape[2]))
-      mask_style_img = self._get_mask_img('micul_print_mask_resized.jpg')
+      mask_style_img = self._get_mask_img(mask_style_img_path)
       mask_style_img = np.reshape(mask_style_img,
                                     (1,
                                      mask_style_img.shape[0],
@@ -277,7 +300,7 @@ class StyleTransfer():
                                      mask_style_img.shape[2]))
       print('Done loading mask images.')
       laplacian_matrix = \
-          self._get_laplacian_matrix('deep_photo_style_transfer/gen_laplacian/ionut.mat')
+          self._get_laplacian_matrix(laplacian_matrix_path)
       print('Done loading laplacian matrix.')
 
       for i in range(self.num_iters):
@@ -303,7 +326,7 @@ class StyleTransfer():
         print('Total loss: ', out_loss)
 
         if i % 10 == 0:
-          ut.save_img(ut.denormalize_img(out_img[0]), 'images/img' + str(i) + '.jpg')
+          ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.jpg')
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
