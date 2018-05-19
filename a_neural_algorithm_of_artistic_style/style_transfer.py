@@ -45,24 +45,6 @@ class StyleTransfer():
     self.learning_rate = learning_rate
     self.num_iters = num_iters
 
-  # def _get_content_loss(self, content_img_layers, noise_img_layers):
-    # content_loss = tf.constant(0.0)
-    # for content_layer_name in self.content_layers:
-      # content_loss = content_loss \
-                     # + tf.reduce_sum(tf.square(
-                        # content_img_layers[content_layer_name] \
-                        # - noise_img_layers[content_layer_name]))
-      # content_loss = tf.scalar_mul(1.0 / (2.0
-                                   # * tf.cast(tf.shape(content_img_layers[content_layer_name])[1],
-                                             # tf.float32)
-                                   # * tf.cast(tf.shape(content_img_layers[content_layer_name])[2],
-                                             # tf.float32)
-                                   # * tf.cast(tf.shape(content_img_layers[content_layer_name])[3],
-                                             # tf.float32)),
-                                   # content_loss)
-
-    # return content_loss
-
   def _get_content_loss(self, content_layer, noise_layer):
     content_loss = tf.constant(0.0)
     content_loss = content_loss \
@@ -78,33 +60,6 @@ class StyleTransfer():
                                  content_loss)
 
     return content_loss
-
-  # def _get_style_loss(self, style_img_layers, noise_img_layers):
-    # style_loss = tf.constant(0.0)
-
-    # for i, style_layer_name in enumerate(self.style_layers):
-      # channels_matrix_style_img = tf.reshape(style_img_layers[style_layer_name],
-                    # [-1, tf.shape(style_img_layers[style_layer_name])[3]])
-      # channels_matrix_noise_img = tf.reshape(noise_img_layers[style_layer_name],
-                    # [-1, tf.shape(noise_img_layers[style_layer_name])[3]])
-
-      # gram_matrix_style = tf.matmul(tf.transpose(channels_matrix_style_img),
-                            # channels_matrix_style_img)
-      # gram_matrix_noise = tf.matmul(tf.transpose(channels_matrix_noise_img),
-                            # channels_matrix_noise_img)
-
-      # El = tf.reduce_sum(tf.square(gram_matrix_style - gram_matrix_noise))
-      # El = tf.scalar_mul(1.0 / (4.0
-                         # * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[1],
-                                             # tf.float32))
-                         # * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[2],
-                                             # tf.float32))
-                         # * tf.square(tf.cast(tf.shape(style_img_layers[style_layer_name])[3],
-                                             # tf.float32))),
-                         # El)
-      # style_loss = style_loss + tf.scalar_mul(self.style_layers_w[i], El)
-
-    # return style_loss
 
   def _get_style_loss(self, style_layer, noise_layer):
     style_loss = tf.constant(0.0)
