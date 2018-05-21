@@ -23,26 +23,26 @@ class Utils():
   def next_batch_val(self, n_batch=None, width=257, height=257, model='vgg'):
     x_batch = []
 
-    x_val, batch_end = self.ds.get_val_batch(n_batch)
-    for x in x_train:
+    x_val = self.ds.get_val_batch(n_batch)
+    for x in x_val:
       x_img = self.get_img(x, width=width, height=height, model=model)
       x_batch.append(x_img)
 
     x_batch = np.array(x_batch)
 
-    return x_batch.astype(np.float32), batch_end
+    return x_batch.astype(np.float32)
 
   def next_batch_test(self, n_batch=None, width=257, height=257, model='vgg'):
     x_batch = []
 
-    x_test, batch_end = self.ds.get_test_batch(n_batch)
-    for x in x_train:
+    x_test = self.ds.get_test_batch(n_batch)
+    for x in x_test:
       x_img = self.get_img(x, width=width, height=height, model=model)
       x_batch.append(x_img)
 
     x_batch = np.array(x_batch)
 
-    return x_batch.astype(np.float32), batch_end
+    return x_batch.astype(np.float32)
 
   def get_img(self, img_name, width=257, height=257, model='vgg'):
     img = cv2.imread(img_name)

@@ -1,6 +1,7 @@
 import os
 import random
 import json
+import numpy as np
 
 class Dataset:
   def __init__(self,
@@ -11,8 +12,6 @@ class Dataset:
     self.data_path = data_path
 
     self.train_batch_idx = 0
-    self.val_batch_idx = 0
-    self.test_batch_idx = 0
 
   def get_train_batch(self, n_batch=None):
     if self._x_train is None: self._get_dataset()
@@ -42,20 +41,10 @@ class Dataset:
     if n_batch is None:
       return self._x_val
 
-    batch_end = False
+    ind = np.random.randint(len(self._x_val), size=n_batch)
+    x_batch = [self.data_path + '/val_imgs/' + self._x_val[i] for i in ind]
 
-    x_batch = [self.data_path + '/val_imgs/' + self._x_val[i]
-               for i in list(range(
-                 self.val_batch_idx,
-                 min(self.val_batch_idx + n_batch,
-                     len(self._x_val))))]
-
-    if self.val_batch_idx + n_batch < len(self._x_val):
-      self.val_batch_idx = self.val_batch_idx + n_batch
-    else:
-      batch_end = True
-
-    return x_batch, batch_end
+    return x_batch
 
   def get_test_batch(self, n_batch=None):
     if self._x_test is None:
@@ -64,20 +53,10 @@ class Dataset:
     if n_batch is None:
       return self._x_test
 
-    batch_end = False
+    ind = np.random.randint(len(self._x_test), size=n_batch)
+    x_batch = [self.data_path + '/test_imgs/' + self._x_test[i] for i in ind]
 
-    x_batch = [self.data_path + '/test_imgs/' + self._x_test[i]
-               for i in list(range(
-                 self.test_batch_idx,
-                 min(self.test_batch_idx + n_batch,
-                     len(self._x_test))))]
-
-    if self.test_batch_idx + n_batch < len(self._x_test):
-      self.test_batch_idx = self.test_batch_idx + n_batch
-    else:
-      batch_end = True
-
-    return x_batch, batch_end
+    return x_batch
 
   def _get_dataset(self):
     self._x_test = []
