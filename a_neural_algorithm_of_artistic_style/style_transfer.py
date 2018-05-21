@@ -106,7 +106,17 @@ class StyleTransfer():
 
     self.noise_img = tf.get_variable(name='output_image',
       initializer=self.noise_img_init)
+    # self.noise_img = tf.get_variable(name='output_image',
+                                     # shape=[1,
+                                            # self.noise_img_height,
+                                            # self.noise_img_width,
+                                            # self.noise_img_channels],
+                                     # initializer=None)
+
     tf.summary.histogram("noise_img", self.noise_img)
+    tf.summary.histogram("style_img", self.style_img)
+    tf.summary.histogram("content_img", self.content_img)
+
     tf.summary.image('noise_img', self.noise_img)
 
     self.content_loss = tf.constant(0.0)
@@ -177,7 +187,7 @@ class StyleTransfer():
         print('Total loss: ', out_loss)
 
         if i % 10 == 0:
-          ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.jpg')
+          ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.png')
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
