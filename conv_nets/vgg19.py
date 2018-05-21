@@ -40,7 +40,7 @@ class VGG19():
 
       # maxpool
       with tf.variable_scope('pool1'):
-        net = tf.contrib.layers.max_pool2d(net, 2)
+        net = tf.contrib.layers.avg_pool2d(net, 2)
 
       # conv2_1
       with tf.variable_scope('conv2_1'):
@@ -68,7 +68,7 @@ class VGG19():
 
       # maxpool
       with tf.variable_scope('pool2'):
-        net = tf.contrib.layers.max_pool2d(net, 2)
+        net = tf.contrib.layers.avg_pool2d(net, 2)
 
       # conv3_1
       with tf.variable_scope('conv3_1'):
@@ -120,7 +120,7 @@ class VGG19():
 
       # maxpool
       with tf.variable_scope('pool3'):
-        net = tf.contrib.layers.max_pool2d(net, 2)
+        net = tf.contrib.layers.avg_pool2d(net, 2)
 
       # conv4_1
       with tf.variable_scope('conv4_1'):
@@ -172,7 +172,7 @@ class VGG19():
 
       # maxpool
       with tf.variable_scope('pool4'):
-        net = tf.contrib.layers.max_pool2d(net, 2)
+        net = tf.contrib.layers.avg_pool2d(net, 2)
 
       # conv5_1
       with tf.variable_scope('conv5_1'):
@@ -224,4 +224,4 @@ class VGG19():
 
       # maxpool
       with tf.variable_scope('pool5'):
-        net = tf.contrib.layers.max_pool2d(net, 2)
+        net = tf.contrib.layers.avg_pool2d(net, 2)
