@@ -169,9 +169,9 @@ class StyleTransfer():
 
           _, content_loss, style_loss, out_loss, out_img =  sess.run(
                 [self.optim, self.content_loss, self.style_loss, self.total_loss, self.noise_img],
-                feed_dict={self.content_img_transform: x_batch_transform,
-                           self.content_img_vgg: x_batch_vgg,
-                           self.style_img: y_batch})
+                 feed_dict={self.content_img_transform: x_batch_transform,
+                            self.content_img_vgg: x_batch_vgg,
+                            self.style_img: y_batch})
 
           print('it: ', i)
           print('Content loss: ', content_loss)
@@ -179,10 +179,16 @@ class StyleTransfer():
           print('Total loss: ', out_loss)
 
           if i % 10 == 0:
-            ut.save_img(ut.denormalize_img(out_img[0]), 'images/img' + str(i) + '.jpg')
-            ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.jpg')
+            x_batch_transform = ut.next_batch_val(n_batch=1,
+                                                  width=self.content_img_width,
+                                                  height=self.content_img_height,
+                                                  model='transform_net')
+            out_img =  sess.run([self.noise_img],
+                                feed_dict={self.content_img_transform: x_batch_transform})
+
+            ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.png')
             ut.save_img(ut.denormalize_img(x_batch_transform[0], model='transform_net'),
-                        save_img_path + '/img' + str(i) + 'c.jpg')
+                        save_img_path + '/img' + str(i) + 'o.jpg')
 
             s = sess.run(summ,
                          feed_dict={self.content_img_transform: x_batch_transform,
