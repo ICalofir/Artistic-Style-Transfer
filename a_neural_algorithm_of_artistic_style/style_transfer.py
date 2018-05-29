@@ -1,13 +1,22 @@
 import cv2
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
-from conv_nets.vgg19 import VGG19
 from utils import Utils
+
+# google cloud
+import importlib
+found_module = importlib.util.find_spec(
+                  'conv_nets')
+if found_module is not None:
+  from conv_nets.vgg19 import VGG19
+else:
+  from vgg19 import VGG19
 
 class StyleTransfer():
   def __init__(self,
       model_name='vgg19',
+      tensorflow_model_path='pretrained_models/vgg19/model/tensorflow/conv_wb.pkl',
       content_img_height=224,
       content_img_width=224,
       content_img_channels=3,
@@ -25,6 +34,7 @@ class StyleTransfer():
       learning_rate=2,
       num_iters=1000):
     self.model_name = model_name
+    self.tensorflow_model_path = tensorflow_model_path
 
     self.content_img_height = content_img_height
     self.content_img_width = content_img_width
@@ -50,14 +60,7 @@ class StyleTransfer():
     content_loss = content_loss \
                    + tf.reduce_sum(tf.square(content_layer \
                                              - noise_layer))
-    content_loss = tf.scalar_mul(1.0 / (2.0
-                                 * tf.cast(tf.shape(content_layer)[1],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_layer)[2],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_layer)[3],
-                                           tf.float32)),
-                                 content_loss)
+    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
 
     return content_loss
 
@@ -92,32 +95,18 @@ class StyleTransfer():
     tf.reset_default_graph()
 
     if self.model_name == 'vgg19':
-      self.model = VGG19()
-      self.noise_img_init = tf.truncated_normal(shape=[1,
-                                                       self.noise_img_height,
-                                                       self.noise_img_width,
-                                                       self.noise_img_channels],
-                                                mean=0.0,
-                                                stddev=57.39)
+      self.model = VGG19(tensorflow_model_path=self.tensorflow_model_path)
+
     self.content_img = tf.placeholder(tf.float32, [None, self.content_img_height,
                 self.content_img_width, self.content_img_channels])
     self.style_img = tf.placeholder(tf.float32, [None, self.style_img_height,
                 self.style_img_width, self.style_img_channels])
-
     self.noise_img = tf.get_variable(name='output_image',
-      initializer=self.noise_img_init)
-    # self.noise_img = tf.get_variable(name='output_image',
-                                     # shape=[1,
-                                            # self.noise_img_height,
-                                            # self.noise_img_width,
-                                            # self.noise_img_channels],
-                                     # initializer=None)
-
-    tf.summary.histogram("noise_img", self.noise_img)
-    tf.summary.histogram("style_img", self.style_img)
-    tf.summary.histogram("content_img", self.content_img)
-
-    tf.summary.image('noise_img', self.noise_img)
+                                     shape=[1,
+                                            self.noise_img_height,
+                                            self.noise_img_width,
+                                            self.noise_img_channels],
+                                     initializer=None)
 
     self.content_loss = tf.constant(0.0)
     for content_layer_name in self.content_layers:
@@ -137,28 +126,34 @@ class StyleTransfer():
     self.total_loss = self.alfa * self.content_loss \
                       + self.beta * self.style_loss
 
-    tf.summary.scalar('content_loss', self.content_loss)
-    tf.summary.scalar('style_loss', self.style_loss)
-    tf.summary.scalar('total_loss', self.total_loss)
-
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'output_image' in var.name]
 
     self.optim = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
         name='adam_optimizer').minimize(self.total_loss, var_list=self.var_list)
 
+    tf.summary.scalar('content_loss', self.content_loss)
+    tf.summary.scalar('style_loss', self.style_loss)
+    tf.summary.scalar('total_loss', self.total_loss)
+
+    tf.summary.histogram("noise_img", self.noise_img)
+    tf.summary.histogram("style_img", self.style_img)
+    tf.summary.histogram("content_img", self.content_img)
+
+    tf.summary.image('noise_img', self.noise_img)
+
   def train(self,
             content_img_path,
             style_img_path,
-            save_img_path):
+            output_img_path='results/anaoas',
+            tensorboard_path='tensorboard/tensorboard_anaoas'):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       sess.run(tf.global_variables_initializer())
 
-      writer = tf.summary.FileWriter('tensorboard')
-      ut = Utils()
-
+      writer = tf.summary.FileWriter(tensorboard_path)
       writer.add_graph(sess.graph)
+      ut = Utils()
 
       content_img = np.reshape(ut.get_img(content_img_path,
                                           width=self.content_img_width,
@@ -187,7 +182,8 @@ class StyleTransfer():
         print('Total loss: ', out_loss)
 
         if i % 10 == 0:
-          ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.png')
+          ut.save_img(ut.denormalize_img(out_img[0]),
+                      output_img_path + '/img' + str(i) + '.png')
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
