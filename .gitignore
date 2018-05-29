@@ -3,6 +3,7 @@ models
 perceptual_losses_for_real_time_style_transfer/dataset
 tensorboard
 results
+gcloud/*.py
 *.pyc
 *.jpg
 *.png
