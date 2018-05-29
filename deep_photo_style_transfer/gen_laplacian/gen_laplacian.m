@@ -2,11 +2,11 @@ pkg load image
 
 addpath matting/
 addpath gaimc/
-N = 7;
+N = 3;
 
-prefix = '../../images/content/d_content';
-img_type = '.png';
-laplacian_name = 'd_laplacian';
+prefix = '../../images/content/content';
+img_type = '.jpg';
+laplacian_name = 'laplacian';
 
 for i = 1:N
     in_name = [prefix int2str(i) img_type];
