@@ -1,15 +1,24 @@
 import cv2
-import tensorflow as tf
 import numpy as np
 import scipy.io as sio
+import tensorflow as tf
 from scipy.sparse import csr_matrix
 
-from conv_nets.vgg19 import VGG19
 from utils import Utils
+
+# google cloud
+import importlib
+found_module = importlib.util.find_spec(
+                  'conv_nets')
+if found_module is not None:
+  from conv_nets.vgg19 import VGG19
+else:
+  from vgg19 import VGG19
 
 class StyleTransfer():
   def __init__(self,
       model_name='vgg19',
+      tensorflow_model_path='pretrained_models/vgg19/model/tensorflow/conv_wb.pkl',
       content_img_height=224,
       content_img_width=224,
       content_img_channels=3,
@@ -28,6 +37,7 @@ class StyleTransfer():
       learning_rate=2,
       num_iters=1000):
     self.model_name = model_name
+    self.tensorflow_model_path = tensorflow_model_path
 
     self.content_img_height = content_img_height
     self.content_img_width = content_img_width
@@ -57,8 +67,16 @@ class StyleTransfer():
                        'red': [52, 52, 205]}
     self.mask_channels = len(self.mask_color)
 
-  def _get_mask_img(self, mask_img_path):
+  def _get_mask_img(self, mask_img_path,
+                    mask_img_height,
+                    mask_img_width,
+                    mask_img_channels):
     mask_img = cv2.imread(mask_img_path)
+    mask_img = np.reshape(cv2.imread(mask_img_path,
+                                     (1,
+                                      mask_img_height,
+                                      mask_img_width,
+                                      mask_img_channels))
     input_mask = None
 
     for k, v in self.mask_color.items():
@@ -124,14 +142,7 @@ class StyleTransfer():
     content_loss = content_loss \
                    + tf.reduce_sum(tf.square(content_layer \
                                              - noise_layer))
-    content_loss = tf.scalar_mul(1.0 / (2.0
-                                 * tf.cast(tf.shape(content_layer)[1],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_layer)[2],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_layer)[3],
-                                           tf.float32)),
-                                 content_loss)
+    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
 
     return content_loss
 
@@ -145,6 +156,7 @@ class StyleTransfer():
     sz = tf.constant([noise_layer.get_shape().as_list()[1],
                       noise_layer.get_shape().as_list()[2]])
     content_img = tf.image.resize_images(mask_content_img, sz)
+
     for c in range(self.mask_channels):
       mask_matrix_style_img = tf.multiply(style_layer,
                                           tf.reshape(style_img[:, :, :, c],
@@ -158,6 +170,7 @@ class StyleTransfer():
                                                       tf.shape(content_img)[1],
                                                       tf.shape(content_img)[2],
                                                       1]))
+
       channels_matrix_style_img = tf.reshape(mask_matrix_style_img,
                                              [-1, tf.shape(mask_matrix_style_img)[3]])
       channels_matrix_noise_img = tf.reshape(mask_matrix_noise_img,
@@ -198,28 +211,23 @@ class StyleTransfer():
     tf.reset_default_graph()
 
     if self.model_name == 'vgg19':
-      self.model = VGG19()
-      self.noise_img_init = tf.truncated_normal(shape=[1,
-                                                       self.noise_img_height,
-                                                       self.noise_img_width,
-                                                       self.noise_img_channels],
-                                                mean=0.0,
-                                                stddev=57.39)
+      self.model = VGG19(tensorflow_model_path=self.tensorflow_model_path)
     self.content_img = tf.placeholder(tf.float32, [None, self.content_img_height,
                 self.content_img_width, self.content_img_channels])
     self.style_img = tf.placeholder(tf.float32, [None, self.style_img_height,
                 self.style_img_width, self.style_img_channels])
+    self.noise_img = tf.get_variable(name='output_image',
+                                     shape=[1,
+                                            self.noise_img_height,
+                                            self.noise_img_width,
+                                            self.noise_img_channels],
+                                     initializer=None)
 
     self.laplacian_matrix = tf.sparse_placeholder(tf.float32)
     self.mask_content_img = tf.placeholder(tf.float32, [None, self.content_img_height,
                 self.content_img_width, self.mask_channels])
     self.mask_style_img = tf.placeholder(tf.float32, [None, self.style_img_height,
                 self.style_img_width, self.mask_channels])
-
-    self.noise_img = tf.get_variable(name='output_image',
-      initializer=self.noise_img_init)
-    tf.summary.histogram("noise_img", self.noise_img)
-    tf.summary.image('noise_img', self.noise_img)
 
     self.content_loss = tf.constant(0.0)
     for content_layer_name in self.content_layers:
@@ -240,14 +248,10 @@ class StyleTransfer():
 
     self.photorealism_loss = self._get_photorealism_loss(self.laplacian_matrix,
                                                          self.noise_img)
+
     self.total_loss = self.alfa * self.content_loss \
                       + self.beta * self.style_loss \
                       + self.gamma * self.photorealism_loss
-
-    tf.summary.scalar('content_loss', self.content_loss)
-    tf.summary.scalar('style_loss', self.style_loss)
-    tf.summary.scalar('photorealism_loss', self.photorealism_loss)
-    tf.summary.scalar('total_loss', self.total_loss)
 
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'output_image' in var.name]
@@ -255,21 +259,32 @@ class StyleTransfer():
     self.optim = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
         name='adam_optimizer').minimize(self.total_loss, var_list=self.var_list)
 
+    tf.summary.scalar('content_loss', self.content_loss)
+    tf.summary.scalar('style_loss', self.style_loss)
+    tf.summary.scalar('photorealism_loss', self.photorealism_loss)
+    tf.summary.scalar('total_loss', self.total_loss)
+
+    tf.summary.histogram("noise_img", self.noise_img)
+    tf.summary.histogram("style_img", self.style_img)
+    tf.summary.histogram("content_img", self.content_img)
+
+    tf.summary.image('noise_img', self.noise_img)
+
   def train(self,
             content_img_path,
             style_img_path,
             mask_content_img_path,
             mask_style_img_path,
             laplacian_matrix_path,
-            save_img_path):
+            output_img_path='results/dpst',
+            tensorboard_path='tensorboard/tensorboard_dpst'):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       sess.run(tf.global_variables_initializer())
 
-      writer = tf.summary.FileWriter('tensorboard')
-      ut = Utils()
-
+      writer = tf.summary.FileWriter(tensorboard_path)
       writer.add_graph(sess.graph)
+      ut = Utils()
 
       content_img = np.reshape(ut.get_img(content_img_path,
                                           width=self.content_img_width,
@@ -286,18 +301,22 @@ class StyleTransfer():
                                          self.style_img_width,
                                          self.style_img_channels))
 
-      mask_content_img = self._get_mask_img(mask_content_img_path)
-      mask_content_img = np.reshape(mask_content_img,
+      mask_content_img = np.reshape(self._get_mask_img(mask_content_img_path,
+                                                       self.content_img_height,
+                                                       self.content_img_width,
+                                                       self.content_img_channels),
                                     (1,
-                                     mask_content_img.shape[0],
-                                     mask_content_img.shape[1],
-                                     mask_content_img.shape[2]))
-      mask_style_img = self._get_mask_img(mask_style_img_path)
-      mask_style_img = np.reshape(mask_style_img,
-                                    (1,
-                                     mask_style_img.shape[0],
-                                     mask_style_img.shape[1],
-                                     mask_style_img.shape[2]))
+                                     self.content_img_height,
+                                     self.content_img_width,
+                                     self.content_img_channels))
+      mask_style_img = np.reshape(self._get_mask_img(mask_style_img_path,
+                                                     self.style_img_height,
+                                                     self.style_img_width,
+                                                     self.style_img_channels),
+                                  (1,
+                                   self.style_img_height,
+                                   self.style_img_width,
+                                   self.style_img_channels))
       print('Done loading mask images.')
       laplacian_matrix = \
           self._get_laplacian_matrix(laplacian_matrix_path)
@@ -326,7 +345,8 @@ class StyleTransfer():
         print('Total loss: ', out_loss)
 
         if i % 10 == 0:
-          ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.jpg')
+          ut.save_img(ut.denormalize_img(out_img[0]),
+                      output_img_path + '/img' + str(i) + '.png')
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
