@@ -1,7 +1,7 @@
 import cv2
 import pickle
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 class VGG19():
   def __init__(self,
