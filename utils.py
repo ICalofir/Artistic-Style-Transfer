@@ -12,9 +12,10 @@ else:
 
 class Utils():
   def __init__(self,
-        data_path='perceptual_losses_for_real_time_style_transfer/dataset'):
+        data_path=None):
 
-    self.ds = Dataset(data_path)
+    if data_path is not None:
+      self.ds = Dataset(data_path)
     self.vgg_means = [103.939, 116.779, 123.68] # BGR
 
   def next_batch_train(self, n_batch=None, width=257, height=257, model='vgg'):
