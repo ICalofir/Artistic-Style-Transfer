@@ -1,11 +1,19 @@
 import cv2
 import numpy as np
 
-from perceptual_losses_for_real_time_style_transfer.dataset import Dataset
+# google cloud
+import importlib
+found_module = importlib.util.find_spec(
+                  'perceptual_losses_for_real_time_style_transfer')
+if found_module is not None:
+  from perceptual_losses_for_real_time_style_transfer.dataset import Dataset
+else:
+  from dataset import Dataset
 
 class Utils():
   def __init__(self,
         data_path='perceptual_losses_for_real_time_style_transfer/dataset'):
+
     self.ds = Dataset(data_path)
     self.vgg_means = [103.939, 116.779, 123.68] # BGR
 
