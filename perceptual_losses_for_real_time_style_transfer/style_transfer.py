@@ -1,14 +1,25 @@
 import cv2
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
-from conv_nets.transform_net import TransformNet
-from conv_nets.vgg19 import VGG19
 from utils import Utils
+
+# google cloud
+import importlib
+found_module = importlib.util.find_spec(
+                  'conv_nets')
+if found_module is not None:
+  from conv_nets.vgg19 import VGG19
+  from conv_nets.transform_net import TransformNet
+else:
+  from vgg19 import VGG19
+  from transform_net import TransformNet
 
 class StyleTransfer():
   def __init__(self,
       model_name='vgg19',
+      tensorflow_model_path='pretrained_models/vgg19/model/tensorflow/conv_wb.pkl',
+      data_path='perceptual_losses_for_real_time_style_transfer/dataset',
       content_img_height=256,
       content_img_width=256,
       content_img_channels=3,
@@ -25,6 +36,8 @@ class StyleTransfer():
       batch_size=4):
     self.vgg_means = [103.939, 116.779, 123.68] # BGR
     self.model_name = model_name
+    self.tensorflow_model_path = tensorflow_model_path
+    self.data_path = data_path
 
     self.content_img_height = content_img_height
     self.content_img_width = content_img_width
@@ -48,14 +61,7 @@ class StyleTransfer():
     content_loss = content_loss \
                    + tf.reduce_sum(tf.square(content_layer \
                                              - noise_layer))
-    content_loss = tf.scalar_mul(1.0 / (2.0
-                                 * tf.cast(tf.shape(content_layer)[1],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_layer)[2],
-                                           tf.float32)
-                                 * tf.cast(tf.shape(content_layer)[3],
-                                           tf.float32)),
-                                 content_loss)
+    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
 
     return content_loss
 
@@ -91,7 +97,7 @@ class StyleTransfer():
     self.model_transform = TransformNet()
 
     if self.model_name == 'vgg19':
-      self.model = VGG19()
+      self.model = VGG19(tensorflow_model_path=self.tensorflow_model_path)
 
     self.content_img_transform = tf.placeholder(tf.float32, [None, self.content_img_height,
                 self.content_img_width, self.content_img_channels])
@@ -124,27 +130,35 @@ class StyleTransfer():
     self.total_loss = self.alfa * self.content_loss \
                       + self.beta * self.style_loss
 
-    tf.summary.scalar('content_loss', self.content_loss)
-    tf.summary.scalar('style_loss', self.style_loss)
-    tf.summary.scalar('total_loss', self.total_loss)
-
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'transform_net' in var.name]
 
     self.optim = tf.train.AdamOptimizer(learning_rate=self.learning_rate,
         name='adam_optimizer').minimize(self.total_loss, var_list=self.var_list)
 
+    tf.summary.scalar('content_loss', self.content_loss)
+    tf.summary.scalar('style_loss', self.style_loss)
+    tf.summary.scalar('total_loss', self.total_loss)
+
+    tf.summary.histogram("noise_img", self.noise_img)
+    tf.summary.histogram("style_img", self.style_img)
+    tf.summary.histogram("content_img", self.content_img_vgg)
+
+    tf.summary.image('noise_img', self.noise_img)
+
   def train(self,
             style_img_path,
-            save_img_path):
+            output_img_path='results/plfrtst',
+            tensorboard_path='tensorboard/tensorboard_plfrtst',
+            model_path='models/model_freeze.ckpt'):
+    saver = tf.train.Saver()
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       sess.run(tf.global_variables_initializer())
 
-      writer = tf.summary.FileWriter('tensorboard')
-      ut = Utils()
-
+      writer = tf.summary.FileWriter(tensorboard_path)
       writer.add_graph(sess.graph)
+      ut = Utils(data_path=self.data_path)
 
       y_batch = []
       for _ in range(self.batch_size):
@@ -156,12 +170,12 @@ class StyleTransfer():
       ep = 0
       i = 0
       while ep < self.no_epochs:
-        ut = Utils()
+        ut = Utils(data_path=self.data_path)
         while True:
           x_batch_transform, batch_end = ut.next_batch_train(self.batch_size,
-                                                   width=self.content_img_width,
-                                                   height=self.content_img_height,
-                                                   model='transform_net')
+                                                             width=self.content_img_width,
+                                                             height=self.content_img_height,
+                                                             model='transform_net')
           x_batch_vgg = ut.normalize_img(ut.denormalize_img(x_batch_transform,
                                                             model='transform_net'))
           if batch_end == True: # end of epoch
@@ -183,12 +197,13 @@ class StyleTransfer():
                                                   width=self.content_img_width,
                                                   height=self.content_img_height,
                                                   model='transform_net')
-            out_img =  sess.run([self.noise_img],
+            out_img =  sess.run(self.noise_img,
                                 feed_dict={self.content_img_transform: x_batch_transform})
 
-            ut.save_img(ut.denormalize_img(out_img[0]), save_img_path + '/img' + str(i) + '.png')
+            ut.save_img(ut.denormalize_img(out_img[0]),
+                        output_img_path + '/img' + str(i) + '.png')
             ut.save_img(ut.denormalize_img(x_batch_transform[0], model='transform_net'),
-                        save_img_path + '/img' + str(i) + 'o.jpg')
+                        output_img_path + '/img' + str(i) + 'o.png')
 
             s = sess.run(summ,
                          feed_dict={self.content_img_transform: x_batch_transform,
@@ -197,3 +212,4 @@ class StyleTransfer():
             writer.add_summary(s, i)
           i = i + 1
         ep = ep + 1
+      saver.save(sess, model_path)
