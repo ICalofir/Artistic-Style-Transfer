@@ -4,8 +4,9 @@ import numpy as np
 from perceptual_losses_for_real_time_style_transfer.dataset import Dataset
 
 class Utils():
-  def __init__(self):
-    self.ds = Dataset()
+  def __init__(self,
+        data_path='perceptual_losses_for_real_time_style_transfer/dataset'):
+    self.ds = Dataset(data_path)
     self.vgg_means = [103.939, 116.779, 123.68] # BGR
 
   def next_batch_train(self, n_batch=None, width=257, height=257, model='vgg'):
@@ -25,18 +26,6 @@ class Utils():
 
     x_val = self.ds.get_val_batch(n_batch)
     for x in x_val:
-      x_img = self.get_img(x, width=width, height=height, model=model)
-      x_batch.append(x_img)
-
-    x_batch = np.array(x_batch)
-
-    return x_batch.astype(np.float32)
-
-  def next_batch_test(self, n_batch=None, width=257, height=257, model='vgg'):
-    x_batch = []
-
-    x_test = self.ds.get_test_batch(n_batch)
-    for x in x_test:
       x_img = self.get_img(x, width=width, height=height, model=model)
       x_batch.append(x_img)
 

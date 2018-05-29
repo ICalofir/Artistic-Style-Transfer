@@ -8,7 +8,6 @@ class Dataset:
       data_path='perceptual_losses_for_real_time_style_transfer/dataset'):
     self._x_train = None
     self._x_val = None
-    self._x_test = None
     self.data_path = data_path
 
     self.train_batch_idx = 0
@@ -46,28 +45,7 @@ class Dataset:
 
     return x_batch
 
-  def get_test_batch(self, n_batch=None):
-    if self._x_test is None:
-      self._get_dataset()
-
-    if n_batch is None:
-      return self._x_test
-
-    ind = np.random.randint(len(self._x_test), size=n_batch)
-    x_batch = [self.data_path + '/test_imgs/' + self._x_test[i] for i in ind]
-
-    return x_batch
-
   def _get_dataset(self):
-    self._x_test = []
-    if os.path.exists(self.data_path + '/anno/test.txt'):
-      with open(self.data_path + '/anno/test.txt') as f:
-        for line in f:
-          img_line = line.rstrip() # remove newline
-          self._x_test.append(img_line)
-
-        random.shuffle(self._x_test)
-
     self._x_val = []
     if os.path.exists(self.data_path + '/anno/val.txt'):
       with open(self.data_path + '/anno/val.txt') as f:
