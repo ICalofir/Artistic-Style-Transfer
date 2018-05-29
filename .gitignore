@@ -1,6 +1,8 @@
 pretrained_models
+models
 perceptual_losses_for_real_time_style_transfer/dataset
 tensorboard
+results
 *.pyc
 *.jpg
 *.png
