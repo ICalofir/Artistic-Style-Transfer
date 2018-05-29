@@ -26,9 +26,9 @@ class StyleTransfer():
       style_img_height=256,
       style_img_width=256,
       style_img_channels=3,
-      content_layers=[],
-      style_layers=[],
-      style_layers_w=[],
+      content_layers=['conv4_2'],
+      style_layers=['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1'],
+      style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
       alfa=1,
       beta=1,
       learning_rate=0.001,
@@ -147,7 +147,7 @@ class StyleTransfer():
     tf.summary.image('noise_img', self.noise_img)
 
   def train(self,
-            style_img_path,
+            style_img_path='images/style/style1.jpg',
             output_img_path='results/plfrtst',
             tensorboard_path='tensorboard/tensorboard_plfrtst',
             model_path='models/model_freeze.ckpt'):

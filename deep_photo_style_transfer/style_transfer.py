@@ -28,14 +28,14 @@ class StyleTransfer():
       noise_img_height=224,
       noise_img_width=224,
       noise_img_channels=3,
-      content_layers=[],
-      style_layers=[],
-      style_layers_w=[],
+      content_layers=['conv4_2'],
+      style_layers=['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1'],
+      style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
       alfa=1,
       beta=1,
       gamma=1,
       learning_rate=2,
-      num_iters=1000):
+      num_iters=2000):
     self.model_name = model_name
     self.tensorflow_model_path = tensorflow_model_path
 
@@ -76,7 +76,7 @@ class StyleTransfer():
                                      (1,
                                       mask_img_height,
                                       mask_img_width,
-                                      mask_img_channels))
+                                      mask_img_channels)))
     input_mask = None
 
     for k, v in self.mask_color.items():
@@ -271,11 +271,11 @@ class StyleTransfer():
     tf.summary.image('noise_img', self.noise_img)
 
   def train(self,
-            content_img_path,
-            style_img_path,
-            mask_content_img_path,
-            mask_style_img_path,
-            laplacian_matrix_path,
+            content_img_path='images/content/d_content1.png',
+            style_img_path='images/style/d_style1.png',
+            mask_content_img_path='images/mask/d_content_mask1.png',
+            mask_style_img_path='images/mask/d_style_mask1.png',
+            laplacian_matrix_path='images/laplacian/d_laplacian1.mat',
             output_img_path='results/dpst',
             tensorboard_path='tensorboard/tensorboard_dpst'):
     summ = tf.summary.merge_all()
