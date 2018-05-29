@@ -8,23 +8,23 @@ import importlib
 found_module = importlib.util.find_spec(
                   'a_neural_algorithm_of_artistic_style')
 if found_module is not None:
-  import a_neural_algorithm_of_artistic_style.style_transfer as anaoas
+  import a_neural_algorithm_of_artistic_style.anaoas_style_transfer as anaoas
 else:
-  import style_transfer as anaoas
+  import anaoas_style_transfer as anaoas
 
 found_module = importlib.util.find_spec(
                   'perceptual_losses_for_real_time_style_transfer')
 if found_module is not None:
-  import perceptual_losses_for_real_time_style_transfer.style_transfer as plfrtst
+  import perceptual_losses_for_real_time_style_transfer.plfrtst_style_transfer as plfrtst
 else:
-  import style_transfer as plfrtst
+  import plfrtst_style_transfer as plfrtst
 
 found_module = importlib.util.find_spec(
                   'deep_photo_style_transfer')
 if found_module is not None:
-  import deep_photo_style_transfer.style_transfer as dpst
+  import deep_photo_style_transfer.dpst_style_transfer as dpst
 else:
-  import style_transfer as dpst
+  import dpst_style_transfer as dpst
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
