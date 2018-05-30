@@ -1,14 +1,7 @@
 import cv2
 import numpy as np
 
-# google cloud
-import importlib
-found_module = importlib.util.find_spec(
-                  'perceptual_losses_for_real_time_style_transfer')
-if found_module is not None:
-  from perceptual_losses_for_real_time_style_transfer.dataset import Dataset
-else:
-  from dataset import Dataset
+from perceptual_losses_for_real_time_style_transfer.dataset import Dataset
 
 class Utils():
   def __init__(self,

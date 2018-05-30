@@ -5,15 +5,7 @@ import tensorflow as tf
 from scipy.sparse import csr_matrix
 
 from utils import Utils
-
-# google cloud
-import importlib
-found_module = importlib.util.find_spec(
-                  'conv_nets')
-if found_module is not None:
-  from conv_nets.vgg19 import VGG19
-else:
-  from vgg19 import VGG19
+from conv_nets.vgg19 import VGG19
 
 class StyleTransfer():
   def __init__(self,

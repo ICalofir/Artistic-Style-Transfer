@@ -3,28 +3,9 @@ import cv2
 import os
 import shutil
 
-# google cloud
-import importlib
-found_module = importlib.util.find_spec(
-                  'a_neural_algorithm_of_artistic_style')
-if found_module is not None:
-  import a_neural_algorithm_of_artistic_style.anaoas_style_transfer as anaoas
-else:
-  import anaoas_style_transfer as anaoas
-
-found_module = importlib.util.find_spec(
-                  'perceptual_losses_for_real_time_style_transfer')
-if found_module is not None:
-  import perceptual_losses_for_real_time_style_transfer.plfrtst_style_transfer as plfrtst
-else:
-  import plfrtst_style_transfer as plfrtst
-
-found_module = importlib.util.find_spec(
-                  'deep_photo_style_transfer')
-if found_module is not None:
-  import deep_photo_style_transfer.dpst_style_transfer as dpst
-else:
-  import dpst_style_transfer as dpst
+import a_neural_algorithm_of_artistic_style.anaoas_style_transfer as anaoas
+import perceptual_losses_for_real_time_style_transfer.plfrtst_style_transfer as plfrtst
+import deep_photo_style_transfer.dpst_style_transfer as dpst
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
@@ -154,12 +135,15 @@ if __name__ == '__main__':
           output_img_path=output_img_path,
           tensorboard_path=tensorboard_path)
     elif args.grid_search:
-      alfa_v = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30,
-                100, 300, 1000]
-      beta_v = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30,
-                100, 300, 1000]
-      learning_rate_v = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30,
-                       100, 300, 1000]
+      # alfa_v = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30,
+                # 100, 300, 1000]
+      # beta_v = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30,
+                # 100, 300, 1000]
+      # learning_rate_v = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30,
+                       # 100, 300, 1000]
+      alfa_v = [0.0001]
+      beta_v = [0.1]
+      learning_rate_v = [3]
       num_iters = 2000
       for learning_rate in learning_rate_v:
         for alfa in alfa_v:

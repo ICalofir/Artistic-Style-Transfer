@@ -40,7 +40,7 @@ class Model():
       layers[layer_name] = layer
 
     with open(self.tensorflow_model_path, 'wb') as f:
-      pickle.dump(layers, f)
+      pickle.dump(layers, f, protocol=2)
 
 if __name__ == '__main__':
   model = Model()

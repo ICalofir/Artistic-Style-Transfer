@@ -3,15 +3,7 @@ import numpy as np
 import tensorflow as tf
 
 from utils import Utils
-
-# google cloud
-import importlib
-found_module = importlib.util.find_spec(
-                  'conv_nets')
-if found_module is not None:
-  from conv_nets.vgg19 import VGG19
-else:
-  from vgg19 import VGG19
+from conv_nets.vgg19 import VGG19
 
 class StyleTransfer():
   def __init__(self,
@@ -55,24 +47,24 @@ class StyleTransfer():
     self.learning_rate = learning_rate
     self.num_iters = num_iters
 
-    print(self.model_name)
-    print(self.tensorflow_model_path)
-    print(self.content_img_height)
-    print(self.content_img_width)
-    print(self.content_img_channels)
-    print(self.style_img_height)
-    print(self.style_img_width)
-    print(self.style_img_channels)
-    print(self.noise_img_height)
-    print(self.noise_img_width)
-    print(self.noise_img_channels)
-    print(self.content_layers)
-    print(self.style_layers)
-    print(self.style_layers_w)
-    print(self.alfa)
-    print(self.beta)
-    print(self.learning_rate)
-    print(self.num_iters)
+    # print(self.model_name)
+    # print(self.tensorflow_model_path)
+    # print(self.content_img_height)
+    # print(self.content_img_width)
+    # print(self.content_img_channels)
+    # print(self.style_img_height)
+    # print(self.style_img_width)
+    # print(self.style_img_channels)
+    # print(self.noise_img_height)
+    # print(self.noise_img_width)
+    # print(self.noise_img_channels)
+    # print(self.content_layers)
+    # print(self.style_layers)
+    # print(self.style_layers_w)
+    # print(self.alfa)
+    # print(self.beta)
+    # print(self.learning_rate)
+    # print(self.num_iters)
 
   def _get_content_loss(self, content_layer, noise_layer):
     content_loss = tf.constant(0.0)
@@ -200,11 +192,10 @@ class StyleTransfer():
         print('Style loss: ', style_loss)
         print('Total loss: ', out_loss)
 
-        if i % 50 == 0:
+        if i % 20 == 0:
           ut.save_img(ut.denormalize_img(out_img[0]),
                       output_img_path + '/img' + str(i) + '.png')
 
-        if i % 100 == 0:
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
                                   self.style_img: style_img})

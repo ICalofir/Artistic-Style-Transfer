@@ -3,17 +3,8 @@ import numpy as np
 import tensorflow as tf
 
 from utils import Utils
-
-# google cloud
-import importlib
-found_module = importlib.util.find_spec(
-                  'conv_nets')
-if found_module is not None:
-  from conv_nets.vgg19 import VGG19
-  from conv_nets.transform_net import TransformNet
-else:
-  from vgg19 import VGG19
-  from transform_net import TransformNet
+from conv_nets.vgg19 import VGG19
+from conv_nets.transform_net import TransformNet
 
 class StyleTransfer():
   def __init__(self,
