@@ -151,10 +151,17 @@ class StyleTransfer():
     tf.summary.scalar('total_loss', self.total_loss)
 
     tf.summary.histogram("noise_img", self.noise_img)
-    tf.summary.histogram("style_img", self.style_img)
-    tf.summary.histogram("content_img", self.content_img)
 
-    tf.summary.image('noise_img', self.noise_img)
+    self.decoded_img = tf.placeholder(tf.uint8,
+                                      [self.noise_img_height,
+                                       self.noise_img_width,
+                                       self.noise_img_channels])
+    self.name_file = tf.placeholder(tf.string)
+
+    self.encoded_img = tf.image.encode_png(self.decoded_img)
+    self.fwrite = tf.write_file(self.name_file, self.encoded_img)
+
+    self.file_bytes = tf.read_file(self.name_file)
 
   def train(self,
             content_img_path='images/content/content1.jpg',
@@ -169,14 +176,20 @@ class StyleTransfer():
       writer.add_graph(sess.graph)
       ut = Utils()
 
-      content_img = np.reshape(ut.get_img(content_img_path,
+      content_img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: content_img_path})
+      content_img_np = np.fromstring(content_img_bytes, np.uint8)
+      content_img = np.reshape(ut.get_img(content_img_np,
                                           width=self.content_img_width,
                                           height=self.content_img_height),
                                           (1,
                                            self.content_img_height,
                                            self.content_img_width,
                                            self.content_img_channels))
-      style_img = np.reshape(ut.get_img(style_img_path,
+      style_img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: style_img_path})
+      style_img_np = np.fromstring(style_img_bytes, np.uint8)
+      style_img = np.reshape(ut.get_img(style_img_np,
                                         width=self.style_img_width,
                                         height=self.style_img_height),
                                         (1,
@@ -196,8 +209,11 @@ class StyleTransfer():
         print('Total loss: ', out_loss)
 
         if i % 20 == 0:
-          ut.save_img(ut.denormalize_img(out_img[0]),
-                      output_img_path + '/img' + str(i) + '.png')
+          decoded_img = ut.denormalize_img(out_img[0])
+          decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
+          sess.run(self.fwrite,
+                   feed_dict={self.decoded_img: decoded_img,
+                              self.name_file: output_img_path + '/img' + str(i) + '.png'})
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
