@@ -3,7 +3,10 @@ import numpy as np
 import tensorflow as tf
 
 from utils import Utils
-from conv_nets.vgg19 import VGG19
+try:
+  from conv_nets.vgg19 import VGG19
+except ImportError: #gcloud
+  from vgg19 import VGG19
 
 class StyleTransfer():
   def __init__(self,
@@ -24,7 +27,7 @@ class StyleTransfer():
       alfa=1,
       beta=1,
       learning_rate=2,
-      num_iters=2000):
+      num_iters=1000):
     self.model_name = model_name
     self.tensorflow_model_path = tensorflow_model_path
 
