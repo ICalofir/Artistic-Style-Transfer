@@ -5,11 +5,11 @@ import numpy as np
 class Model():
   def __init__(self,
       caffe_model_path=
-        'pretrained_models/vgg19/model/caffe/VGG_ILSVRC_19_layers.caffemodel',
+        'vgg19/model/caffe/VGG_ILSVRC_19_layers.caffemodel',
       caffe_prototxt_path=
-        'pretrained_models/vgg19/model/caffe/layer_configuration.prototxt',
+        'vgg19/model/caffe/layer_configuration.prototxt',
       tensorflow_model_path=
-        'pretrained_models/vgg19/model/tensorflow/conv_wb.pkl'):
+        'vgg19/model/tensorflow/conv_wb.pkl'):
 
     self.caffe_model_path = caffe_model_path
     self.caffe_prototxt_path = caffe_prototxt_path
