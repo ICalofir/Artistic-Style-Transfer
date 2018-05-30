@@ -13,3 +13,4 @@ cp ../perceptual_losses_for_real_time_style_transfer/dataset.py $DIRECTORY/datas
 cp ../deep_photo_style_transfer/dpst_style_transfer.py $DIRECTORY/dpst_style_transfer.py
 cp ../conv_nets/transform_net.py $DIRECTORY/transform_net.py
 cp ../conv_nets/vgg19.py $DIRECTORY/vgg19.py
+touch $DIRECTORY/__init__.py
