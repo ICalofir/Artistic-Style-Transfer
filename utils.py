@@ -39,7 +39,10 @@ class Utils():
     return x_batch.astype(np.float32)
 
   def get_img(self, img_name, width=224, height=224, model='vgg'):
-    img = cv2.imread(img_name)
+    if (type(img_name) == type('')):
+      img = cv2.imread(img_name)
+    else:
+      img = cv2.imdecode(img_name, cv2.IMREAD_COLOR)
 
     if width != -1 and height != -1:
       img = self.resize_img(img, width, height)
@@ -54,11 +57,11 @@ class Utils():
     return img
 
   def resize_with_ratio(self, width=None, height=None, size=None):
-    if (size is not None or size != -1) and height > width:
+    if (size is not None and size != -1) and height > width:
       new_height = size
       new_width = int((width * new_height)
                       / height)
-    elif (size is not None or size != -1):
+    elif (size is not None and size != -1):
       new_width = size
       new_height = int((height * new_width)
                        / width)
