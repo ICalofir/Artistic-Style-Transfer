@@ -9,8 +9,12 @@ class VGG19():
         'pretrained_models/vgg19/model/tensorflow/conv_wb.pkl'):
 
       self.tensorflow_model_path = tensorflow_model_path
-      with open(self.tensorflow_model_path, 'rb') as f:
-        self.tensorflow_model = pickle.load(f)
+
+      s = tf.InteractiveSession()
+      fread = tf.read_file(self.tensorflow_model_path)
+
+      self.tensorflow_model = pickle.loads(fread.eval())
+      s.close()
 
   def run(self, img, layer_name, name='vgg19'):
     with tf.variable_scope(name, reuse=tf.AUTO_REUSE):
