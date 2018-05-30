@@ -2,6 +2,8 @@ import argparse
 import cv2
 import os
 import shutil
+import numpy as np
+import tensorflow as tf
 
 from utils import Utils
 try:
@@ -106,11 +108,20 @@ if __name__ == '__main__':
     if args.train:
       ut = Utils()
       content_img_path = args.content_img_path or 'images/content/content1.jpg'
-      content_img = ut.get_img(content_img_path,
+      style_img_path = args.style_img_path or 'images/style/style1.jpg'
+
+      s = tf.InteractiveSession()
+      content_img_bytes = tf.read_file(content_img_path)
+      style_img_bytes = tf.read_file(style_img_path)
+
+      content_img_np = np.fromstring(content_img_bytes.eval(), np.uint8)
+      style_img_np = np.fromstring(style_img_bytes.eval(), np.uint8)
+      s.close()
+
+      content_img = ut.get_img(content_img_np,
                                width=-1,
                                height=-1)
-      style_img_path = args.style_img_path or 'images/style/style1.jpg'
-      style_img = ut.get_img(style_img_path,
+      style_img = ut.get_img(style_img_np,
                              width=-1,
                              height=-1)
       content_img_height = content_img.shape[0]
@@ -151,14 +162,14 @@ if __name__ == '__main__':
           num_iters=args.num_iters or 1000)
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_anaoas'
-      if os.path.exists(tensorboard_path):
-        shutil.rmtree(tensorboard_path)
-      os.makedirs(tensorboard_path)
+      if tf.gfile.IsDirectory(tensorboard_path):
+        tf.gfile.DeleteRecursively(tensorboard_path)
+      tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/anaoas'
-      if os.path.exists(output_img_path):
-        shutil.rmtree(output_img_path)
-      os.makedirs(output_img_path)
+      if tf.gfile.IsDirectory(output_img_path):
+        tf.gfile.DeleteRecursively(output_img_path)
+      tf.gfile.MakeDirs(output_img_path)
 
       model.build()
       model.train(
