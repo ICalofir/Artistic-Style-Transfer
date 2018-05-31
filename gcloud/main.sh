@@ -4,7 +4,9 @@ if [ -d "$DIRECTORY" ]; then
 fi
 mkdir $DIRECTORY
 
-cp local_trainer.sh $DIRECTORY/local_trainer.sh
+cp anaoas_local_trainer.sh $DIRECTORY/anaoas_local_trainer.sh
+cp dpst_local_trainer.sh $DIRECTORY/dpst_local_trainer.sh
+cp plfrtst_local_trainer.sh $DIRECTORY/plfrtst_local_trainer.sh
 cp ../main.py $DIRECTORY/main.py
 cp ../utils.py $DIRECTORY/utils.py
 cp ../pretrained_models/model.py $DIRECTORY/model.py
