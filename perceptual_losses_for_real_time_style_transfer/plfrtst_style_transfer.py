@@ -3,8 +3,12 @@ import numpy as np
 import tensorflow as tf
 
 from utils import Utils
-from conv_nets.vgg19 import VGG19
-from conv_nets.transform_net import TransformNet
+try:
+  from conv_nets.vgg19 import VGG19
+  from conv_nets.transform_net import TransformNet
+except ImportError: #gcloud
+  from vgg19 import VGG19
+  from transform_net import TransformNet
 
 class StyleTransfer():
   def __init__(self,
