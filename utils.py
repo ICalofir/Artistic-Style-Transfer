@@ -14,29 +14,19 @@ class Utils():
       self.ds = Dataset(data_path)
     self.vgg_means = [103.939, 116.779, 123.68] # BGR
 
-  def next_batch_train(self, n_batch=None, width=224, height=224, model='vgg'):
+  def next_batch_train(self, n_batch=None):
     x_batch = []
 
     x_train, batch_end = self.ds.get_train_batch(n_batch)
-    for x in x_train:
-      x_img = self.get_img(x, width=width, height=height, model=model)
-      x_batch.append(x_img)
 
-    x_batch = np.array(x_batch)
+    return x_train, batch_end
 
-    return x_batch.astype(np.float32), batch_end
-
-  def next_batch_val(self, n_batch=None, width=224, height=224, model='vgg'):
+  def next_batch_val(self, n_batch=None):
     x_batch = []
 
     x_val = self.ds.get_val_batch(n_batch)
-    for x in x_val:
-      x_img = self.get_img(x, width=width, height=height, model=model)
-      x_batch.append(x_img)
 
-    x_batch = np.array(x_batch)
-
-    return x_batch.astype(np.float32)
+    return x_val
 
   def get_img(self, img_name, width=224, height=224, model='vgg'):
     if (type(img_name) == type('')):
