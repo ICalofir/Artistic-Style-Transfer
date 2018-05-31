@@ -4,9 +4,10 @@ if [ -d "$DIRECTORY" ]; then
 fi
 mkdir $DIRECTORY
 
+cp local_trainer.sh $DIRECTORY/local_trainer.sh
 cp ../main.py $DIRECTORY/main.py
 cp ../utils.py $DIRECTORY/utils.py
-cp ../model.py $DIRECTORY/model.py
+cp ../pretrained_models/model.py $DIRECTORY/model.py
 cp ../a_neural_algorithm_of_artistic_style/anaoas_style_transfer.py $DIRECTORY/anaoas_style_transfer.py
 cp ../perceptual_losses_for_real_time_style_transfer/plfrtst_style_transfer.py $DIRECTORY/plfrtst_style_transfer.py
 cp ../perceptual_losses_for_real_time_style_transfer/dataset.py $DIRECTORY/dataset.py
