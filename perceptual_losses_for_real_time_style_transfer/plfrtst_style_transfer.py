@@ -22,6 +22,7 @@ class StyleTransfer():
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
       alfa=1,
       beta=1,
+      gamma=1,
       learning_rate=0.001,
       no_epochs=2,
       batch_size=4):
@@ -42,17 +43,43 @@ class StyleTransfer():
     self.style_layers_w = style_layers_w
     self.alfa = alfa
     self.beta = beta
+    self.gamma = gamma
 
     self.learning_rate = learning_rate
     self.no_epochs = no_epochs
     self.batch_size = batch_size
+
+    print(self.model_name)
+    print(self.tensorflow_model_path)
+    print(self.content_img_height)
+    print(self.content_img_width)
+    print(self.content_img_channels)
+    print(self.style_img_height)
+    print(self.style_img_width)
+    print(self.style_img_channels)
+    print(self.content_layers)
+    print(self.style_layers)
+    print(self.style_layers_w)
+    print(self.alfa)
+    print(self.beta)
+    print(self.learning_rate)
+    print(self.no_epochs)
+    print(self.batch_size)
+    print(self.gamma)
 
   def _get_content_loss(self, content_layer, noise_layer):
     content_loss = tf.constant(0.0)
     content_loss = content_loss \
                    + tf.reduce_sum(tf.square(content_layer \
                                              - noise_layer))
-    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
+    content_loss = tf.scalar_mul(1.0 / (2.0
+                                 * tf.cast(tf.shape(content_layer)[1],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[2],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[3],
+                                           tf.float32)),
+                                 content_loss)
 
     return content_loss
 
@@ -83,6 +110,11 @@ class StyleTransfer():
 
     return style_loss
 
+  def _get_total_variation_loss(self, noise_img):
+    tv_loss = tf.reduce_sum(tf.image.total_variation(noise_img))
+
+    return tv_loss
+
   def build(self):
     tf.reset_default_graph()
     self.model_transform = TransformNet()
@@ -99,6 +131,8 @@ class StyleTransfer():
 
     self.noise_img = self.model_transform.run(self.content_img_transform)
     self.noise_img = (self.noise_img + 1) * 127.5 # denormalize img from transform_net
+
+    self.total_variation_loss = self._get_total_variation_loss(self.noise_img)
 
     if self.model_name == 'vgg19':
       self.noise_img = self.noise_img - self.vgg_means # normalize img for vgg19
@@ -119,7 +153,8 @@ class StyleTransfer():
                                 self._get_style_loss(style_layer, noise_layer))
 
     self.total_loss = self.alfa * self.content_loss \
-                      + self.beta * self.style_loss
+                      + self.beta * self.style_loss \
+                      + self.gamma * self.total_variation_loss
 
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'transform_net' in var.name]
@@ -130,12 +165,20 @@ class StyleTransfer():
     tf.summary.scalar('content_loss', self.content_loss)
     tf.summary.scalar('style_loss', self.style_loss)
     tf.summary.scalar('total_loss', self.total_loss)
+    tf.summary.scalar('total_variation_loss', self.total_variation_loss)
 
     tf.summary.histogram("noise_img", self.noise_img)
-    tf.summary.histogram("style_img", self.style_img)
-    tf.summary.histogram("content_img", self.content_img_vgg)
 
-    tf.summary.image('noise_img', self.noise_img)
+    self.decoded_img = tf.placeholder(tf.uint8,
+                                      [self.content_img_height,
+                                       self.content_img_width,
+                                       self.content_img_channels])
+    self.name_file = tf.placeholder(tf.string)
+
+    self.encoded_img = tf.image.encode_png(self.decoded_img)
+    self.fwrite = tf.write_file(self.name_file, self.encoded_img)
+
+    self.file_bytes = tf.read_file(self.name_file)
 
   def train(self,
             style_img_path='images/style/style1.jpg',
@@ -152,8 +195,11 @@ class StyleTransfer():
       ut = Utils(data_path=self.data_path)
 
       y_batch = []
+      style_img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: style_img_path})
+      style_img_np = np.fromstring(style_img_bytes, np.uint8)
       for _ in range(self.batch_size):
-        y_batch.append(ut.get_img(style_img_path,
+        y_batch.append(ut.get_img(style_img_np,
                                   width=self.style_img_width,
                                   height=self.style_img_height))
       y_batch = np.array(y_batch).astype(np.float32)
@@ -163,38 +209,66 @@ class StyleTransfer():
       while ep < self.no_epochs:
         ut = Utils(data_path=self.data_path)
         while True:
-          x_batch_transform, batch_end = ut.next_batch_train(self.batch_size,
-                                                             width=self.content_img_width,
-                                                             height=self.content_img_height,
-                                                             model='transform_net')
+          x_batch_transform_name, batch_end = ut.next_batch_train(self.batch_size)
+          x_batch_transform = []
+          for x in x_batch_transform_name:
+            content_img_bytes = sess.run(self.file_bytes,
+              feed_dict={self.name_file: x})
+            content_img_np = np.fromstring(content_img_bytes, np.uint8)
+            x_img = ut.get_img(content_img_np,
+                               width=self.content_img_width,
+                               height=self.content_img_height,
+                               model='transform_net')
+            x_batch_transform.append(x_img)
+          x_batch_transform = np.array(x_batch_transform).astype(np.float32)
+
           x_batch_vgg = ut.normalize_img(ut.denormalize_img(x_batch_transform,
                                                             model='transform_net'))
           if batch_end == True: # end of epoch
             break
 
-          _, content_loss, style_loss, out_loss, out_img =  sess.run(
-                [self.optim, self.content_loss, self.style_loss, self.total_loss, self.noise_img],
+          _, content_loss, style_loss, tv_loss, out_loss, out_img =  sess.run(
+                [self.optim, self.content_loss, self.style_loss, self.total_variation_loss,
+                 self.total_loss, self.noise_img],
                  feed_dict={self.content_img_transform: x_batch_transform,
                             self.content_img_vgg: x_batch_vgg,
                             self.style_img: y_batch})
 
+          print('ep', ep)
           print('it: ', i)
           print('Content loss: ', content_loss)
           print('Style loss: ', style_loss)
+          print('Total Variation loss', tv_loss)
           print('Total loss: ', out_loss)
 
-          if i % 10 == 0:
-            x_batch_transform = ut.next_batch_val(n_batch=1,
-                                                  width=self.content_img_width,
-                                                  height=self.content_img_height,
-                                                  model='transform_net')
+          if i % 20 == 0:
+            x_batch_transform_name = ut.next_batch_val(n_batch=1)
+            x_batch_transform = []
+            for x in x_batch_transform_name:
+              content_img_bytes = sess.run(self.file_bytes,
+                feed_dict={self.name_file: x})
+              content_img_np = np.fromstring(content_img_bytes, np.uint8)
+              x_img = ut.get_img(content_img_np,
+                                 width=self.content_img_width,
+                                 height=self.content_img_height,
+                                 model='transform_net')
+              x_batch_transform.append(x_img)
+            x_batch_transform = np.array(x_batch_transform).astype(np.float32)
+
             out_img =  sess.run(self.noise_img,
                                 feed_dict={self.content_img_transform: x_batch_transform})
 
-            ut.save_img(ut.denormalize_img(out_img[0]),
-                        output_img_path + '/img' + str(i) + '.png')
-            ut.save_img(ut.denormalize_img(x_batch_transform[0], model='transform_net'),
-                        output_img_path + '/img' + str(i) + 'o.png')
+            decoded_img = ut.denormalize_img(out_img[0])
+            decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
+            sess.run(self.fwrite,
+                   feed_dict={self.decoded_img: decoded_img,
+                              self.name_file: output_img_path + '/img' + str(i) + '.png'})
+
+            decoded_img = ut.denormalize_img(x_batch_transform[0], model='transform_net')
+            decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
+            sess.run(self.fwrite,
+                   feed_dict={self.decoded_img: decoded_img,
+                              self.name_file: output_img_path + '/img' + str(i) + 'o.png'})
 
             s = sess.run(summ,
                          feed_dict={self.content_img_transform: x_batch_transform,
@@ -203,4 +277,4 @@ class StyleTransfer():
             writer.add_summary(s, i)
           i = i + 1
         ep = ep + 1
-      saver.save(sess, model_path)
+      saver.save(sess, model_path + '/model_freeze.ckpt')
