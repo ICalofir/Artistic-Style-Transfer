@@ -74,7 +74,14 @@ class StyleTransfer():
     content_loss = content_loss \
                    + tf.reduce_sum(tf.square(content_layer \
                                              - noise_layer))
-    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
+    content_loss = tf.scalar_mul(1.0 / (2.0
+                                 * tf.cast(tf.shape(content_layer)[1],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[2],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[3],
+                                           tf.float32)),
+                                 content_loss)
 
     return content_loss
 
