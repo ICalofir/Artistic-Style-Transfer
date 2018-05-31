@@ -5,4 +5,5 @@ gcloud/trainer
 models
 tensorboard
 results
+images/laplacian
 *.pyc
