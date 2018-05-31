@@ -2,10 +2,14 @@ import cv2
 import numpy as np
 import scipy.io as sio
 import tensorflow as tf
+from io import BytesIO
 from scipy.sparse import csr_matrix
 
 from utils import Utils
-from conv_nets.vgg19 import VGG19
+try:
+  from conv_nets.vgg19 import VGG19
+except ImportError: #gcloud
+  from vgg19 import VGG19
 
 class StyleTransfer():
   def __init__(self,
@@ -27,7 +31,7 @@ class StyleTransfer():
       beta=1,
       gamma=1,
       learning_rate=2,
-      num_iters=2000):
+      num_iters=1000):
     self.model_name = model_name
     self.tensorflow_model_path = tensorflow_model_path
 
@@ -59,16 +63,35 @@ class StyleTransfer():
                        'red': [52, 52, 205]}
     self.mask_channels = len(self.mask_color)
 
+    print(self.model_name)
+    print(self.tensorflow_model_path)
+    print(self.content_img_height)
+    print(self.content_img_width)
+    print(self.content_img_channels)
+    print(self.style_img_height)
+    print(self.style_img_width)
+    print(self.style_img_channels)
+    print(self.noise_img_height)
+    print(self.noise_img_width)
+    print(self.noise_img_channels)
+    print(self.content_layers)
+    print(self.style_layers)
+    print(self.style_layers_w)
+    print(self.alfa)
+    print(self.beta)
+    print(self.learning_rate)
+    print(self.num_iters)
+    print(self.gamma)
+
   def _get_mask_img(self, mask_img_path,
                     mask_img_height,
                     mask_img_width,
                     mask_img_channels):
-    mask_img = cv2.imread(mask_img_path)
-    mask_img = np.reshape(cv2.imread(mask_img_path,
-                                     (1,
-                                      mask_img_height,
-                                      mask_img_width,
-                                      mask_img_channels)))
+    ut = Utils()
+    mask_img = ut.get_img(mask_img_path,
+                          width=mask_img_width,
+                          height=mask_img_height,
+                          model=None)
     input_mask = None
 
     for k, v in self.mask_color.items():
@@ -134,7 +157,14 @@ class StyleTransfer():
     content_loss = content_loss \
                    + tf.reduce_sum(tf.square(content_layer \
                                              - noise_layer))
-    content_loss = tf.scalar_mul(1.0 / 2.0, content_loss)
+    content_loss = tf.scalar_mul(1.0 / (2.0
+                                 * tf.cast(tf.shape(content_layer)[1],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[2],
+                                           tf.float32)
+                                 * tf.cast(tf.shape(content_layer)[3],
+                                           tf.float32)),
+                                 content_loss)
 
     return content_loss
 
@@ -257,10 +287,17 @@ class StyleTransfer():
     tf.summary.scalar('total_loss', self.total_loss)
 
     tf.summary.histogram("noise_img", self.noise_img)
-    tf.summary.histogram("style_img", self.style_img)
-    tf.summary.histogram("content_img", self.content_img)
 
-    tf.summary.image('noise_img', self.noise_img)
+    self.decoded_img = tf.placeholder(tf.uint8,
+                                      [self.noise_img_height,
+                                       self.noise_img_width,
+                                       self.noise_img_channels])
+    self.name_file = tf.placeholder(tf.string)
+
+    self.encoded_img = tf.image.encode_png(self.decoded_img)
+    self.fwrite = tf.write_file(self.name_file, self.encoded_img)
+
+    self.file_bytes = tf.read_file(self.name_file)
 
   def train(self,
             content_img_path='images/content/d_content1.png',
@@ -278,14 +315,20 @@ class StyleTransfer():
       writer.add_graph(sess.graph)
       ut = Utils()
 
-      content_img = np.reshape(ut.get_img(content_img_path,
+      img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: content_img_path})
+      img_np = np.fromstring(img_bytes, np.uint8)
+      content_img = np.reshape(ut.get_img(img_np,
                                           width=self.content_img_width,
                                           height=self.content_img_height),
                                           (1,
                                            self.content_img_height,
                                            self.content_img_width,
                                            self.content_img_channels))
-      style_img = np.reshape(ut.get_img(style_img_path,
+      img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: style_img_path})
+      img_np = np.fromstring(img_bytes, np.uint8)
+      style_img = np.reshape(ut.get_img(img_np,
                                         width=self.style_img_width,
                                         height=self.style_img_height),
                                         (1,
@@ -293,25 +336,33 @@ class StyleTransfer():
                                          self.style_img_width,
                                          self.style_img_channels))
 
-      mask_content_img = np.reshape(self._get_mask_img(mask_content_img_path,
+      img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: mask_content_img_path})
+      img_np = np.fromstring(img_bytes, np.uint8)
+      mask_content_img = np.reshape(self._get_mask_img(img_np,
                                                        self.content_img_height,
                                                        self.content_img_width,
                                                        self.content_img_channels),
                                     (1,
                                      self.content_img_height,
                                      self.content_img_width,
-                                     self.content_img_channels))
-      mask_style_img = np.reshape(self._get_mask_img(mask_style_img_path,
+                                     self.mask_channels))
+      img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: mask_style_img_path})
+      img_np = np.fromstring(img_bytes, np.uint8)
+      mask_style_img = np.reshape(self._get_mask_img(img_np,
                                                      self.style_img_height,
                                                      self.style_img_width,
                                                      self.style_img_channels),
                                   (1,
                                    self.style_img_height,
                                    self.style_img_width,
-                                   self.style_img_channels))
+                                   self.mask_channels))
       print('Done loading mask images.')
+      laplacian_matrix_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: laplacian_matrix_path})
       laplacian_matrix = \
-          self._get_laplacian_matrix(laplacian_matrix_path)
+          self._get_laplacian_matrix(BytesIO(laplacian_matrix_bytes))
       print('Done loading laplacian matrix.')
 
       for i in range(self.num_iters):
@@ -336,9 +387,12 @@ class StyleTransfer():
         print('Photorealism loss: ', photorealism_loss)
         print('Total loss: ', out_loss)
 
-        if i % 10 == 0:
-          ut.save_img(ut.denormalize_img(out_img[0]),
-                      output_img_path + '/img' + str(i) + '.png')
+        if i % 20 == 0:
+          decoded_img = ut.denormalize_img(out_img[0])
+          decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
+          sess.run(self.fwrite,
+                   feed_dict={self.decoded_img: decoded_img,
+                              self.name_file: output_img_path + '/img' + str(i) + '.png'})
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,
