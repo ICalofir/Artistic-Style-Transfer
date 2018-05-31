@@ -34,10 +34,10 @@ class TransformNet():
       # res_block1
       with tf.variable_scope('res_block1'):
         res_net = tf.contrib.layers.conv2d(net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         res_net = tf.nn.relu(res_net)
         res_net = tf.contrib.layers.conv2d(res_net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         net = net + res_net
 
         tf.summary.histogram("activation", net)
@@ -45,10 +45,10 @@ class TransformNet():
       # res_block2
       with tf.variable_scope('res_block2'):
         res_net = tf.contrib.layers.conv2d(net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         res_net = tf.nn.relu(res_net)
         res_net = tf.contrib.layers.conv2d(res_net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         net = net + res_net
 
         tf.summary.histogram("activation", net)
@@ -56,10 +56,10 @@ class TransformNet():
       # res_block3
       with tf.variable_scope('res_block3'):
         res_net = tf.contrib.layers.conv2d(net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         res_net = tf.nn.relu(res_net)
         res_net = tf.contrib.layers.conv2d(res_net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         net = net + res_net
 
         tf.summary.histogram("activation", net)
@@ -67,10 +67,10 @@ class TransformNet():
       # res_block4
       with tf.variable_scope('res_block4'):
         res_net = tf.contrib.layers.conv2d(net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         res_net = tf.nn.relu(res_net)
         res_net = tf.contrib.layers.conv2d(res_net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         net = net + res_net
 
         tf.summary.histogram("activation", net)
@@ -78,10 +78,10 @@ class TransformNet():
       # res_block5
       with tf.variable_scope('res_block5'):
         res_net = tf.contrib.layers.conv2d(net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         res_net = tf.nn.relu(res_net)
         res_net = tf.contrib.layers.conv2d(res_net, 128, 3, activation_fn=None)
-        res_net = tf.contrib.layers.batch_norm(net)
+        res_net = tf.contrib.layers.batch_norm(res_net)
         net = net + res_net
 
         tf.summary.histogram("activation", net)
@@ -104,7 +104,9 @@ class TransformNet():
 
       # conv_transpose3
       with tf.variable_scope('conv_transpose3'):
-        net = tf.contrib.layers.conv2d_transpose(net, 3, 9, activation_fn=tf.nn.tanh)
+        net = tf.contrib.layers.conv2d_transpose(net, 3, 9, activation_fn=None)
+        net = tf.contrib.layers.batch_norm(net)
+        net = tf.nn.tanh(net)
 
         tf.summary.histogram("activation", net)
 
