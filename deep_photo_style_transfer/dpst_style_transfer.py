@@ -63,26 +63,6 @@ class StyleTransfer():
                        'red': [52, 52, 205]}
     self.mask_channels = len(self.mask_color)
 
-    # print(self.model_name)
-    # print(self.tensorflow_model_path)
-    # print(self.content_img_height)
-    # print(self.content_img_width)
-    # print(self.content_img_channels)
-    # print(self.style_img_height)
-    # print(self.style_img_width)
-    # print(self.style_img_channels)
-    # print(self.noise_img_height)
-    # print(self.noise_img_width)
-    # print(self.noise_img_channels)
-    # print(self.content_layers)
-    # print(self.style_layers)
-    # print(self.style_layers_w)
-    # print(self.alfa)
-    # print(self.beta)
-    # print(self.learning_rate)
-    # print(self.num_iters)
-    # print(self.gamma)
-
   def _get_mask_img(self, mask_img_path,
                     mask_img_height,
                     mask_img_width,

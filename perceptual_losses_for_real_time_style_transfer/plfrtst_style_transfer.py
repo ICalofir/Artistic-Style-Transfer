@@ -53,24 +53,6 @@ class StyleTransfer():
     self.no_epochs = no_epochs
     self.batch_size = batch_size
 
-    # print(self.model_name)
-    # print(self.tensorflow_model_path)
-    # print(self.content_img_height)
-    # print(self.content_img_width)
-    # print(self.content_img_channels)
-    # print(self.style_img_height)
-    # print(self.style_img_width)
-    # print(self.style_img_channels)
-    # print(self.content_layers)
-    # print(self.style_layers)
-    # print(self.style_layers_w)
-    # print(self.alfa)
-    # print(self.beta)
-    # print(self.learning_rate)
-    # print(self.no_epochs)
-    # print(self.batch_size)
-    # print(self.gamma)
-
   def _get_content_loss(self, content_layer, noise_layer):
     content_loss = tf.constant(0.0)
     content_loss = content_loss \
