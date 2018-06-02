@@ -150,8 +150,8 @@ class StyleTransfer():
 
     tf.summary.scalar('content_loss', self.content_loss)
     tf.summary.scalar('style_loss', self.style_loss)
+    tf.summary.scalar('tv_loss', self.total_variation_loss)
     tf.summary.scalar('total_loss', self.total_loss)
-    tf.summary.scalar('total_variation_loss', self.total_variation_loss)
 
     tf.summary.histogram("noise_img", self.noise_img)
 
@@ -224,7 +224,7 @@ class StyleTransfer():
           print('it: ', i)
           print('Content loss: ', content_loss)
           print('Style loss: ', style_loss)
-          print('Total Variation loss', tv_loss)
+          print('Total variation loss', tv_loss)
           print('Total loss: ', out_loss)
 
           if i % 20 == 0:
