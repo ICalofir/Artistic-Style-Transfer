@@ -73,6 +73,9 @@ if __name__ == '__main__':
   parser.add_argument('--gamma',
                       help='',
                       type=float)
+  parser.add_argument('--llambda',
+                      help='',
+                      type=float)
   parser.add_argument('--learning_rate',
                       help='',
                       type=float)
@@ -151,13 +154,14 @@ if __name__ == '__main__':
           noise_img_height=args.content_img_height or 224,
           noise_img_width=args.content_img_width or 224,
           noise_img_channels=args.content_img_channels or 3,
-          content_layers=args.content_layers or ['conv4_2'],
+          content_layers=args.content_layers or ['relu4_2'],
           style_layers=args.style_layers
-              or ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1'],
+              or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
           alfa=args.alfa or 1,
           beta=args.beta or 1,
+          gamma=args.gamma or 1,
           learning_rate=args.learning_rate or 2,
           num_iters=args.num_iters or 1000)
 
@@ -213,9 +217,9 @@ if __name__ == '__main__':
           style_img_height=args.style_img_height or 256,
           style_img_width=args.style_img_width or 256,
           style_img_channels=args.style_img_channels or 3,
-          content_layers=args.content_layers or ['conv4_2'],
+          content_layers=args.content_layers or ['relu4_2'],
           style_layers=args.style_layers
-              or ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1'],
+              or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
           alfa=args.alfa or 1,
@@ -295,14 +299,15 @@ if __name__ == '__main__':
           noise_img_height=args.content_img_height or 224,
           noise_img_width=args.content_img_width or 224,
           noise_img_channels=args.content_img_channels or 3,
-          content_layers=args.content_layers or ['conv4_2'],
+          content_layers=args.content_layers or ['relu4_2'],
           style_layers=args.style_layers
-              or ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1'],
+              or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
           alfa=args.alfa or 1,
           beta=args.beta or 1,
           gamma=args.gamma or 1,
+          llambda=args.llambda or 1,
           learning_rate=args.learning_rate or 2,
           num_iters=args.num_iters or 1000)
 
