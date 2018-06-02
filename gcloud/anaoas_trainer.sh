@@ -1,21 +1,22 @@
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 BUCKET_NAME=${PROJECT_ID}-mlengine
-REGION=us-central1
+REGION=europe-west1
 JOB_NAME=$1
 STAGING_BUCKET=gs://$BUCKET_NAME
 
 METHOD_NAME=anaoas
 TENSORFLOW_MODEL_PATH=gs://$BUCKET_NAME/pretrained_models/vgg19/model/tensorflow/conv_wb.pkl
-CONTENT_IMG_SIZE=$8
-STYLE_IMG_SIZE=$9
+CONTENT_IMG_SIZE=$9
+STYLE_IMG_SIZE=${10}
 ALFA=$2
 BETA=$3
-LEARNING_RATE=$4
-NUM_ITERS=$5
-CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$6
-STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$7
-OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/anaoas/alfa_${ALFA}_beta_${BETA}_lr_${LEARNING_RATE}
-TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_anaoas/alfa_${ALFA}_beta_${BETA}_lr_${LEARNING_RATE}
+GAMMA=$4
+LEARNING_RATE=$5
+NUM_ITERS=$6
+CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$7
+STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$8
+OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
+TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
 
 gcloud ml-engine jobs submit training $JOB_NAME \
     --staging-bucket=${STAGING_BUCKET} \
@@ -30,6 +31,7 @@ gcloud ml-engine jobs submit training $JOB_NAME \
     --tensorflow_model_path $TENSORFLOW_MODEL_PATH \
     --alfa $ALFA \
     --beta $BETA \
+    --gamma $GAMMA \
     --learning_rate $LEARNING_RATE \
     --num_iters $NUM_ITERS \
     --content_img_size $CONTENT_IMG_SIZE \

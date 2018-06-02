@@ -6,20 +6,21 @@ STAGING_BUCKET=gs://$BUCKET_NAME
 
 METHOD_NAME=dpst
 TENSORFLOW_MODEL_PATH=gs://$BUCKET_NAME/pretrained_models/vgg19/model/tensorflow/conv_wb.pkl
-CONTENT_IMG_SIZE=${12}
-STYLE_IMG_SIZE=${13}
+CONTENT_IMG_SIZE=${13}
+STYLE_IMG_SIZE=${14}
 ALFA=$2
 BETA=$3
 GAMMA=$4
-LEARNING_RATE=$5
-NUM_ITERS=$6
-CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$7
-STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$8
-OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-MASK_CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/mask/$9
-MASK_STYLE_IMG_PATH=gs://$BUCKET_NAME/images/mask/${10}
-LAPLACIAN_MATRIX_PATH=gs://$BUCKET_NAME/images/laplacian/${11}
+LLAMBDA=$5
+LEARNING_RATE=$6
+NUM_ITERS=$7
+CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$8
+STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$9
+OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}
+TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}
+MASK_CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/mask/${10}
+MASK_STYLE_IMG_PATH=gs://$BUCKET_NAME/images/mask/${11}
+LAPLACIAN_MATRIX_PATH=gs://$BUCKET_NAME/images/laplacian/${12}
 
 gcloud ml-engine jobs submit training $JOB_NAME \
     --staging-bucket=${STAGING_BUCKET} \
@@ -35,6 +36,7 @@ gcloud ml-engine jobs submit training $JOB_NAME \
     --alfa $ALFA \
     --beta $BETA \
     --gamma $GAMMA \
+    --llambda $LLAMBDA \
     --learning_rate $LEARNING_RATE \
     --num_iters $NUM_ITERS \
     --content_img_size $CONTENT_IMG_SIZE \

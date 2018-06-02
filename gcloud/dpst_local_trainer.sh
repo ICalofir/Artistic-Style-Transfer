@@ -1,19 +1,20 @@
 METHOD_NAME=dpst
 TENSORFLOW_MODEL_PATH=../../pretrained_models/vgg19/model/tensorflow/conv_wb.pkl
-CONTENT_IMG_SIZE=${11}
-STYLE_IMG_SIZE=${12}
+CONTENT_IMG_SIZE=${12}
+STYLE_IMG_SIZE=${13}
 ALFA=$1
 BETA=$2
 GAMMA=$3
-LEARNING_RATE=$4
-NUM_ITERS=$5
-CONTENT_IMG_PATH=../../images/content/$6
-STYLE_IMG_PATH=../../images/style/$7
-OUTPUT_IMG_PATH=../../results/dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-TENSORBOARD_PATH=../../tensorboard/tensorboard_dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-MASK_CONTENT_IMG_PATH=../../images/mask/$8
-MASK_STYLE_IMG_PATH=../../images/mask/$9
-LAPLACIAN_MATRIX_PATH=../../images/laplacian/${10}
+LLAMBDA=$4
+LEARNING_RATE=$5
+NUM_ITERS=$6
+CONTENT_IMG_PATH=../../images/content/$7
+STYLE_IMG_PATH=../../images/style/$8
+OUTPUT_IMG_PATH=../../results/dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}
+TENSORBOARD_PATH=../../tensorboard/tensorboard_dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}
+MASK_CONTENT_IMG_PATH=../../images/mask/$9
+MASK_STYLE_IMG_PATH=../../images/mask/${10}
+LAPLACIAN_MATRIX_PATH=../../images/laplacian/${11}
 
 python main.py \
     --method $METHOD_NAME \
@@ -22,6 +23,7 @@ python main.py \
     --alfa $ALFA \
     --beta $BETA \
     --gamma $GAMMA \
+    --llambda $LLAMBDA \
     --learning_rate $LEARNING_RATE \
     --num_iters $NUM_ITERS \
     --content_img_size $CONTENT_IMG_SIZE \
