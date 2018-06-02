@@ -26,6 +26,7 @@ class StyleTransfer():
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
       alfa=1,
       beta=1,
+      gamma=1,
       learning_rate=2,
       num_iters=1000):
     self.model_name = model_name
@@ -46,6 +47,7 @@ class StyleTransfer():
     self.style_layers_w = style_layers_w
     self.alfa = alfa
     self.beta = beta
+    self.gamma = gamma
 
     self.learning_rate = learning_rate
     self.num_iters = num_iters
@@ -93,6 +95,11 @@ class StyleTransfer():
 
     return style_loss
 
+  def _get_total_variation_loss(self, noise_img):
+    tv_loss = tf.reduce_sum(tf.image.total_variation(noise_img))
+
+    return tv_loss
+
   def build(self):
     tf.reset_default_graph()
 
@@ -103,12 +110,13 @@ class StyleTransfer():
                 self.content_img_width, self.content_img_channels])
     self.style_img = tf.placeholder(tf.float32, [None, self.style_img_height,
                 self.style_img_width, self.style_img_channels])
+
+    self.noise_img_init = tf.placeholder(tf.float32, [1, self.noise_img_height,
+                self.noise_img_width, self.noise_img_channels])
     self.noise_img = tf.get_variable(name='output_image',
-                                     shape=[1,
-                                            self.noise_img_height,
-                                            self.noise_img_width,
-                                            self.noise_img_channels],
-                                     initializer=None)
+                                     initializer=self.noise_img_init)
+
+    self.total_variation_loss = self._get_total_variation_loss(self.noise_img)
 
     self.content_loss = tf.constant(0.0)
     for content_layer_name in self.content_layers:
@@ -126,7 +134,8 @@ class StyleTransfer():
                                 self._get_style_loss(style_layer, noise_layer))
 
     self.total_loss = self.alfa * self.content_loss \
-                      + self.beta * self.style_loss
+                      + self.beta * self.style_loss \
+                      + self.gamma * self.total_variation_loss
 
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'output_image' in var.name]
@@ -136,6 +145,7 @@ class StyleTransfer():
 
     tf.summary.scalar('content_loss', self.content_loss)
     tf.summary.scalar('style_loss', self.style_loss)
+    tf.summary.scalar('tv_loss', self.total_variation_loss)
     tf.summary.scalar('total_loss', self.total_loss)
 
     tf.summary.histogram("noise_img", self.noise_img)
@@ -158,11 +168,21 @@ class StyleTransfer():
             tensorboard_path='tensorboard/tensorboard_anaoas'):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
-      sess.run(tf.global_variables_initializer())
+      ut = Utils()
+      noise_img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: content_img_path})
+      noise_img_np = np.fromstring(noise_img_bytes, np.uint8)
+      noise_img = np.reshape(ut.add_noise(ut.get_img(noise_img_np,
+                                                     width=self.noise_img_width,
+                                                     height=self.noise_img_height)),
+                             (1,
+                             self.noise_img_height,
+                             self.noise_img_width,
+                             self.noise_img_channels))
+      sess.run(tf.global_variables_initializer(), feed_dict={self.noise_img_init: noise_img})
 
       writer = tf.summary.FileWriter(tensorboard_path)
       writer.add_graph(sess.graph)
-      ut = Utils()
 
       content_img_bytes = sess.run(self.file_bytes,
           feed_dict={self.name_file: content_img_path})
@@ -186,14 +206,16 @@ class StyleTransfer():
                                          self.style_img_channels))
 
       for i in range(self.num_iters):
-        _, content_loss, style_loss, out_loss, out_img =  sess.run(
-              [self.optim, self.content_loss, self.style_loss, self.total_loss, self.noise_img],
+        _, content_loss, style_loss, tv_loss, out_loss, out_img =  sess.run(
+              [self.optim, self.content_loss, self.style_loss, self.total_variation_loss,
+               self.total_loss, self.noise_img],
               feed_dict={self.content_img: content_img,
                          self.style_img: style_img})
 
         print('it: ', i)
         print('Content loss: ', content_loss)
         print('Style loss: ', style_loss)
+        print('Total variation loss: ', tv_loss)
         print('Total loss: ', out_loss)
 
         if i % 20 == 0:
