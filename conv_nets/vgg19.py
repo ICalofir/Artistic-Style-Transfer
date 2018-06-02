@@ -29,6 +29,8 @@ class VGG19():
         if layer_name == 'conv1_1':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu1_1':
+          return net
 
       # conv1_2
       with tf.variable_scope('conv1_2'):
@@ -41,6 +43,8 @@ class VGG19():
         if layer_name == 'conv1_2':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu1_2':
+          return net
 
       # maxpool
       with tf.variable_scope('pool1'):
@@ -57,6 +61,8 @@ class VGG19():
         if layer_name == 'conv2_1':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu2_1':
+          return net
 
       # conv2_2
       with tf.variable_scope('conv2_2'):
@@ -69,6 +75,8 @@ class VGG19():
         if layer_name == 'conv2_2':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu2_2':
+          return net
 
       # maxpool
       with tf.variable_scope('pool2'):
@@ -85,6 +93,8 @@ class VGG19():
         if layer_name == 'conv3_1':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu3_1':
+          return net
 
       # conv3_2
       with tf.variable_scope('conv3_2'):
@@ -97,6 +107,8 @@ class VGG19():
         if layer_name == 'conv3_2':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu3_2':
+          return net
 
       # conv3_3
       with tf.variable_scope('conv3_3'):
@@ -109,6 +121,8 @@ class VGG19():
         if layer_name == 'conv3_3':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu3_3':
+          return net
 
       # conv3_4
       with tf.variable_scope('conv3_4'):
@@ -121,6 +135,8 @@ class VGG19():
         if layer_name == 'conv3_4':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu3_4':
+          return net
 
       # maxpool
       with tf.variable_scope('pool3'):
@@ -137,6 +153,8 @@ class VGG19():
         if layer_name == 'conv4_1':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu4_1':
+          return net
 
       # conv4_2
       with tf.variable_scope('conv4_2'):
@@ -149,6 +167,8 @@ class VGG19():
         if layer_name == 'conv4_2':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu4_2':
+          return net
 
       # conv4_3
       with tf.variable_scope('conv4_3'):
@@ -161,6 +181,8 @@ class VGG19():
         if layer_name == 'conv4_3':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu4_3':
+          return net
 
       # conv4_4
       with tf.variable_scope('conv4_4'):
@@ -173,6 +195,8 @@ class VGG19():
         if layer_name == 'conv4_4':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu4_4':
+          return net
 
       # maxpool
       with tf.variable_scope('pool4'):
@@ -189,6 +213,8 @@ class VGG19():
         if layer_name == 'conv5_1':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu5_1':
+          return net
 
       # conv5_2
       with tf.variable_scope('conv5_2'):
@@ -201,6 +227,8 @@ class VGG19():
         if layer_name == 'conv5_2':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu5_2':
+          return net
 
       # conv5_3
       with tf.variable_scope('conv5_3'):
@@ -213,6 +241,8 @@ class VGG19():
         if layer_name == 'conv5_3':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu5_3':
+          return net
 
       # conv5_4
       with tf.variable_scope('conv5_4'):
@@ -225,6 +255,8 @@ class VGG19():
         if layer_name == 'conv5_4':
           return net
         net = tf.nn.relu(net)
+        if layer_name == 'relu5_4':
+          return net
 
       # maxpool
       with tf.variable_scope('pool5'):
