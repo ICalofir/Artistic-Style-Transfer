@@ -72,6 +72,16 @@ class Utils():
 
     return new_height, new_width
 
+  def add_noise(self, img, noise_ratio=0.5):
+    original_img = img.astype(np.float32)
+    noise_img = np.random.normal(0.0,
+                                 25.0,
+                                 (img.shape[0],
+                                  img.shape[1],
+                                  img.shape[2])).astype(np.float32)
+    img = noise_img * noise_ratio + original_img * (1 - noise_ratio)
+    return img
+
   def normalize_img(self, img, model='vgg'):
     img = img.astype(np.float32)
 
