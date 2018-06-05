@@ -164,13 +164,14 @@ class StyleTransfer():
   def train(self,
             content_img_path='images/content/content1.jpg',
             style_img_path='images/style/style1.jpg',
+            noise_img_path='images/content/content1.jpg',
             output_img_path='results/anaoas',
             tensorboard_path='tensorboard/tensorboard_anaoas'):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       ut = Utils()
       noise_img_bytes = sess.run(self.file_bytes,
-          feed_dict={self.name_file: content_img_path})
+          feed_dict={self.name_file: noise_img_path})
       noise_img_np = np.fromstring(noise_img_bytes, np.uint8)
       noise_img = np.reshape(ut.add_noise(ut.get_img(noise_img_np,
                                                      width=self.noise_img_width,

@@ -292,6 +292,7 @@ class StyleTransfer():
   def train(self,
             content_img_path='images/content/d_content1.png',
             style_img_path='images/style/d_style1.png',
+            noise_img_path='images/content/d_content1.jpg',
             mask_content_img_path='images/mask/d_content_mask1.png',
             mask_style_img_path='images/mask/d_style_mask1.png',
             laplacian_matrix_path='images/laplacian/d_laplacian1.mat',
@@ -301,7 +302,7 @@ class StyleTransfer():
     with tf.Session() as sess:
       ut = Utils()
       noise_img_bytes = sess.run(self.file_bytes,
-          feed_dict={self.name_file: content_img_path})
+          feed_dict={self.name_file: noise_img_path})
       noise_img_np = np.fromstring(noise_img_bytes, np.uint8)
       noise_img = np.reshape(ut.add_noise(ut.get_img(noise_img_np,
                                                      width=self.noise_img_width,

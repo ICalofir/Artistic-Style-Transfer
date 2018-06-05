@@ -92,6 +92,8 @@ if __name__ == '__main__':
                       help='')
   parser.add_argument('--style_img_path',
                       help='')
+  parser.add_argument('--noise_img_path',
+                      help='')
   parser.add_argument('--mask_content_img_path',
                       help='')
   parser.add_argument('--mask_style_img_path',
@@ -112,6 +114,7 @@ if __name__ == '__main__':
       ut = Utils()
       content_img_path = args.content_img_path or 'images/content/content1.jpg'
       style_img_path = args.style_img_path or 'images/style/style1.jpg'
+      noise_img_path = args.noise_img_path or 'images/content/content1.jpg'
 
       s = tf.InteractiveSession()
       content_img_bytes = tf.read_file(content_img_path)
@@ -179,6 +182,7 @@ if __name__ == '__main__':
       model.train(
           content_img_path=content_img_path,
           style_img_path=style_img_path,
+          noise_img_path=noise_img_path,
           output_img_path=output_img_path,
           tensorboard_path=tensorboard_path)
     else:
@@ -257,6 +261,7 @@ if __name__ == '__main__':
       ut = Utils()
       content_img_path = args.content_img_path or 'images/content/d_content1.png'
       style_img_path = args.style_img_path or 'images/style/d_style1.png'
+      noise_img_path = args.noise_img_path or 'images/content/d_content1.jpg'
 
       s = tf.InteractiveSession()
       content_img_bytes = tf.read_file(content_img_path)
@@ -325,6 +330,7 @@ if __name__ == '__main__':
       model.train(
           content_img_path=content_img_path,
           style_img_path=style_img_path,
+          noise_img_path=noise_img_path,
           mask_content_img_path=args.mask_content_img_path \
                                   or 'images/mask/mask_d_content1.png',
           mask_style_img_path=args.mask_style_img_path \
