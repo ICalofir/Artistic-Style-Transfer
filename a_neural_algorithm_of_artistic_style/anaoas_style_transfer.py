@@ -133,9 +133,13 @@ class StyleTransfer():
                           + tf.scalar_mul(self.style_layers_w[i],
                                 self._get_style_loss(style_layer, noise_layer))
 
-    self.total_loss = self.alfa * self.content_loss \
-                      + self.beta * self.style_loss \
-                      + self.gamma * self.total_variation_loss
+    if self.gamma == 0.0:
+      self.total_loss = self.alfa * self.content_loss \
+                        + self.beta * self.style_loss
+    else:
+      self.total_loss = self.alfa * self.content_loss \
+                        + self.beta * self.style_loss \
+                        + self.gamma * self.total_variation_loss
 
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'output_image' in var.name]

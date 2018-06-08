@@ -259,10 +259,15 @@ class StyleTransfer():
     self.photorealism_loss = self._get_photorealism_loss(self.laplacian_matrix,
                                                          self.noise_img)
 
-    self.total_loss = self.alfa * self.content_loss \
-                      + self.beta * self.style_loss \
-                      + self.gamma * self.photorealism_loss \
-                      + self.llambda * self.total_variation_loss
+    if self.gamma == 0.0:
+      self.total_loss = self.alfa * self.content_loss \
+                        + self.beta * self.style_loss \
+                        + self.llambda * self.total_variation_loss
+    else:
+      self.total_loss = self.alfa * self.content_loss \
+                        + self.beta * self.style_loss \
+                        + self.gamma * self.photorealism_loss \
+                        + self.llambda * self.total_variation_loss
 
     var_list = tf.trainable_variables()
     self.var_list = [var for var in var_list if 'output_image' in var.name]
