@@ -164,7 +164,7 @@ if __name__ == '__main__':
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
           alfa=args.alfa or 1,
           beta=args.beta or 1,
-          gamma=args.gamma or 1,
+          gamma=args.gamma or 0.0,
           learning_rate=args.learning_rate or 2,
           num_iters=args.num_iters or 1000)
 
@@ -311,7 +311,7 @@ if __name__ == '__main__':
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
           alfa=args.alfa or 1,
           beta=args.beta or 1,
-          gamma=args.gamma or 1,
+          gamma=args.gamma or 0.0,
           llambda=args.llambda or 1,
           learning_rate=args.learning_rate or 2,
           num_iters=args.num_iters or 1000)

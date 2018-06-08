@@ -29,7 +29,7 @@ class StyleTransfer():
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
       alfa=1,
       beta=1,
-      gamma=1,
+      gamma=0.0,
       llambda=1,
       learning_rate=2,
       num_iters=1000):
