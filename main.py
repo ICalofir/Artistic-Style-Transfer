@@ -259,9 +259,9 @@ if __name__ == '__main__':
   elif args.method == 'dpst':
     if args.train:
       ut = Utils()
-      content_img_path = args.content_img_path or 'images/content/d_content1.png'
+      content_img_path = args.content_img_path or 'images/content/d_content1_resized.png'
       style_img_path = args.style_img_path or 'images/style/d_style1.png'
-      noise_img_path = args.noise_img_path or 'images/content/d_content1.jpg'
+      noise_img_path = args.noise_img_path or 'images/content/d_content1_resized.png'
 
       s = tf.InteractiveSession()
       content_img_bytes = tf.read_file(content_img_path)
@@ -336,7 +336,7 @@ if __name__ == '__main__':
           mask_style_img_path=args.mask_style_img_path \
                                   or 'images/mask/mask_d_style1.png',
           laplacian_matrix_path=args.laplacian_matrix_path \
-                                  or 'images/laplacian/d_laplacian1.mat',
+                                  or 'images/laplacian/d_laplacian1_resized.mat',
           output_img_path=output_img_path,
           tensorboard_path=tensorboard_path)
     else:
