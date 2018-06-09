@@ -115,6 +115,13 @@ class StyleTransfer():
                 self.noise_img_width, self.noise_img_channels])
     self.noise_img = tf.get_variable(name='output_image',
                                      initializer=self.noise_img_init)
+    # xavier init
+    # self.noise_img = tf.get_variable(name='output_image',
+                                     # shape=[1,
+                                            # self.noise_img_height,
+                                            # self.noise_img_width,
+                                            # self.noise_img_channels],
+                                     # initializer=None)
 
     self.total_variation_loss = self._get_total_variation_loss(self.noise_img)
 

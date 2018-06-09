@@ -226,8 +226,8 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 1.0,
-          beta=args.beta or 100.0,
+          alfa=args.alfa or 500.0,
+          beta=args.beta or 1.0,
           gamma=args.gamma or 0.001,
           batch_size=args.batch_size or 1,
           no_epochs=args.no_epochs or 2,

@@ -24,8 +24,8 @@ class StyleTransfer():
       content_layers=['relu4_2'],
       style_layers=['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-      alfa=1.0,
-      beta=100.0,
+      alfa=500.0,
+      beta=1.0,
       gamma=0.001,
       learning_rate=0.001,
       no_epochs=2,
@@ -213,9 +213,9 @@ class StyleTransfer():
           if batch_end == True: # end of epoch
             break
 
-          _, content_loss, style_loss, tv_loss, out_loss, out_img =  sess.run(
+          _, content_loss, style_loss, tv_loss, out_loss =  sess.run(
                 [self.optim, self.content_loss, self.style_loss, self.total_variation_loss,
-                 self.total_loss, self.noise_img],
+                 self.total_loss],
                  feed_dict={self.content_img_transform: x_batch_transform,
                             self.content_img_vgg: x_batch_vgg,
                             self.style_img: y_batch})
@@ -227,7 +227,7 @@ class StyleTransfer():
           print('Total variation loss', tv_loss)
           print('Total loss: ', out_loss)
 
-          if i % 20 == 0:
+          if i % 100 == 0:
             x_batch_transform_name = ut.next_batch_val(n_batch=1)
             x_batch_transform = []
             for x in x_batch_transform_name:
@@ -241,8 +241,8 @@ class StyleTransfer():
               x_batch_transform.append(x_img)
             x_batch_transform = np.array(x_batch_transform).astype(np.float32)
 
-            out_img =  sess.run(self.noise_img,
-                                feed_dict={self.content_img_transform: x_batch_transform})
+            out_img = sess.run(self.noise_img,
+                               feed_dict={self.content_img_transform: x_batch_transform})
 
             decoded_img = ut.denormalize_img(out_img[0])
             decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
@@ -263,4 +263,5 @@ class StyleTransfer():
             writer.add_summary(s, i)
           i = i + 1
         ep = ep + 1
+        saver.save(sess, model_path + '/model_freeze_' + str(ep) + '_.ckpt')
       saver.save(sess, model_path + '/model_freeze.ckpt')
