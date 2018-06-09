@@ -162,20 +162,20 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 1,
-          beta=args.beta or 1,
-          gamma=args.gamma or 0.0,
+          alfa=args.alfa or 1.0,
+          beta=args.beta or 100.0,
+          gamma=args.gamma or 0.001,
           learning_rate=args.learning_rate or 2,
-          num_iters=args.num_iters or 1000)
+          num_iters=args.num_iters or 2000)
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_anaoas'
-      if tf.gfile.IsDirectory(tensorboard_path):
-        tf.gfile.DeleteRecursively(tensorboard_path)
+      # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
+        # tf.gfile.DeleteRecursively(tensorboard_path)
       tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/anaoas'
-      if tf.gfile.IsDirectory(output_img_path):
-        tf.gfile.DeleteRecursively(output_img_path)
+      # if tf.gfile.IsDirectory(output_img_path): # for gcloud comment this
+        # tf.gfile.DeleteRecursively(output_img_path)
       tf.gfile.MakeDirs(output_img_path)
 
       model.build()
@@ -226,16 +226,16 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 1,
-          beta=args.beta or 1,
-          gamma=args.gamma or 1,
-          batch_size=args.batch_size or 4,
+          alfa=args.alfa or 1.0,
+          beta=args.beta or 100.0,
+          gamma=args.gamma or 0.001,
+          batch_size=args.batch_size or 1,
           no_epochs=args.no_epochs or 2,
           learning_rate=args.learning_rate or 0.001)
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_plfrtst'
-      if tf.gfile.IsDirectory(tensorboard_path):
-        tf.gfile.DeleteRecursively(tensorboard_path)
+      # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
+        # tf.gfile.DeleteRecursively(tensorboard_path)
       tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/plfrtst'
@@ -244,8 +244,8 @@ if __name__ == '__main__':
       tf.gfile.MakeDirs(output_img_path)
 
       model_path = args.model_path or 'models'
-      if tf.gfile.IsDirectory(model_path):
-        tf.gfile.DeleteRecursively(model_path)
+      # if tf.gfile.IsDirectory(model_path): # for gcloud comment this
+        # tf.gfile.DeleteRecursively(model_path)
       tf.gfile.MakeDirs(model_path)
 
       model.build()
@@ -309,21 +309,21 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 1,
-          beta=args.beta or 1,
+          alfa=args.alfa or 1.0,
+          beta=args.beta or 100.0,
           gamma=args.gamma or 0.0,
-          llambda=args.llambda or 1,
+          llambda=args.llambda or 0.001,
           learning_rate=args.learning_rate or 2,
-          num_iters=args.num_iters or 1000)
+          num_iters=args.num_iters or 2000)
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_dpst'
-      if tf.gfile.IsDirectory(tensorboard_path):
-        tf.gfile.DeleteRecursively(tensorboard_path)
+      # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
+        # tf.gfile.DeleteRecursively(tensorboard_path)
       tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/dpst'
-      if tf.gfile.IsDirectory(output_img_path):
-        tf.gfile.DeleteRecursively(output_img_path)
+      # if tf.gfile.IsDirectory(output_img_path): # for gcloud comment this
+        # tf.gfile.DeleteRecursively(output_img_path)
       tf.gfile.MakeDirs(output_img_path)
 
       model.build()

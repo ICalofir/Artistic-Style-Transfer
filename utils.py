@@ -55,14 +55,6 @@ class Utils():
       new_width = size
       new_height = int((height * new_width)
                        / width)
-    elif height is not None and width is None:
-      new_height = height
-      new_width = int((width * new_height)
-                      / height)
-    elif height is None and width is not None:
-      new_width = width
-      new_height = int((height * new_width)
-                       / width)
     elif size is not None:
       new_height = height
       new_width = width

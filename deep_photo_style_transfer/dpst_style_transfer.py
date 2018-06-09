@@ -24,15 +24,15 @@ class StyleTransfer():
       noise_img_height=224,
       noise_img_width=224,
       noise_img_channels=3,
-      content_layers=['conv4_2'],
-      style_layers=['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1'],
+      content_layers=['relu4_2'],
+      style_layers=['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-      alfa=1,
-      beta=1,
+      alfa=1.0,
+      beta=100.0,
       gamma=0.0,
-      llambda=1,
+      llambda=0.001,
       learning_rate=2,
-      num_iters=1000):
+      num_iters=2000):
     self.model_name = model_name
     self.tensorflow_model_path = tensorflow_model_path
 

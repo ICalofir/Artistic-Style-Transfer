@@ -16,8 +16,8 @@ NUM_ITERS=$6
 CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$7
 STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$8
 NOISE_IMG_PATH=gs://$BUCKET_NAME/images/content/$9
-OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
+OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
+TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
 
 gcloud ml-engine jobs submit training $JOB_NAME \
     --staging-bucket=${STAGING_BUCKET} \
