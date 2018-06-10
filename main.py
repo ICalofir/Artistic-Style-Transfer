@@ -239,8 +239,8 @@ if __name__ == '__main__':
       tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/plfrtst'
-      if tf.gfile.IsDirectory(output_img_path):
-        tf.gfile.DeleteRecursively(output_img_path)
+      # if tf.gfile.IsDirectory(output_img_path):
+        # tf.gfile.DeleteRecursively(output_img_path)
       tf.gfile.MakeDirs(output_img_path)
 
       model_path = args.model_path or 'models'
