@@ -247,7 +247,7 @@ class StyleTransfer():
           print('Total variation loss', tv_loss)
           print('Total loss: ', out_loss)
 
-          if i % 100 == 0:
+          if i % 500 == 0:
             x_batch_transform_name = ut.next_batch_val(n_batch=1)
             x_batch_transform = []
             for x in x_batch_transform_name:

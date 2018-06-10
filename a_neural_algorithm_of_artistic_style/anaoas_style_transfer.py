@@ -236,7 +236,7 @@ class StyleTransfer():
         print('Total variation loss: ', tv_loss)
         print('Total loss: ', out_loss)
 
-        if i % 20 == 0:
+        if i % 100 == 0:
           decoded_img = ut.denormalize_img(out_img[0])
           decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
           sess.run(self.fwrite,
