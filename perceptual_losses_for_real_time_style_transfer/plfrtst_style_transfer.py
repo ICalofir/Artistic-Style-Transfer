@@ -24,7 +24,7 @@ class StyleTransfer():
       content_layers=['relu4_2'],
       style_layers=['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-      alfa=500.0,
+      alfa=100.0,
       beta=1.0,
       gamma=0.001,
       learning_rate=0.001,
@@ -170,7 +170,7 @@ class StyleTransfer():
             style_img_path='images/style/style1.jpg',
             output_img_path='results/plfrtst',
             tensorboard_path='tensorboard/tensorboard_plfrtst',
-            model_path='models/model_freeze.ckpt'):
+            model_path='models'):
     saver = tf.train.Saver()
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
@@ -265,3 +265,40 @@ class StyleTransfer():
         ep = ep + 1
         saver.save(sess, model_path + '/model_freeze_' + str(ep) + '_.ckpt')
       saver.save(sess, model_path + '/model_freeze.ckpt')
+
+  def predict(self,
+            content_img_path='images/content/content1.jpg',
+            output_img_path='results/plfrtst_predict',
+            model_path='models/model_freeze.ckpt'):
+    saver = tf.train.Saver()
+    summ = tf.summary.merge_all()
+    with tf.Session() as sess:
+      saver.restore(sess, model_path)
+      ut = Utils(data_path=self.data_path)
+
+      content_img_bytes = sess.run(self.file_bytes,
+          feed_dict={self.name_file: content_img_path})
+      content_img_np = np.fromstring(content_img_bytes, np.uint8)
+      content_img = np.reshape(ut.get_img(content_img_np,
+                                          width=self.content_img_width,
+                                          height=self.content_img_height,
+                                          model='transform_net'),
+                                          (1,
+                                           self.content_img_height,
+                                           self.content_img_width,
+                                           self.content_img_channels))
+
+      out_img = sess.run(self.noise_img,
+                         feed_dict={self.content_img_transform: content_img})
+
+      decoded_img = ut.denormalize_img(out_img[0])
+      decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
+      sess.run(self.fwrite,
+               feed_dict={self.decoded_img: decoded_img,
+                          self.name_file: output_img_path + '/img.png'})
+
+      decoded_img = ut.denormalize_img(content_img[0], model='transform_net')
+      decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
+      sess.run(self.fwrite,
+               feed_dict={self.decoded_img: decoded_img,
+                          self.name_file: output_img_path + '/imgo.png'})

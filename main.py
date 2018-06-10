@@ -24,6 +24,8 @@ if __name__ == '__main__':
   parser.add_argument('--train',
                       help='if true, start training a neural network',
                       action='store_true')
+  parser.add_argument('--predict',
+                      action='store_true')
   parser.add_argument('--model_name',
                       help='')
   parser.add_argument('--tensorflow_model_path',
@@ -226,7 +228,7 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 500.0,
+          alfa=args.alfa or 100.0,
           beta=args.beta or 1.0,
           gamma=args.gamma or 0.001,
           batch_size=args.batch_size or 1,
@@ -254,6 +256,63 @@ if __name__ == '__main__':
           style_img_path=style_img_path,
           output_img_path=output_img_path,
           tensorboard_path=tensorboard_path)
+    elif args.predict:
+      ut = Utils()
+      content_img_path = args.content_img_path or 'images/content/content1.jpg'
+
+      s = tf.InteractiveSession()
+      content_img_bytes = tf.read_file(content_img_path)
+
+      content_img_np = np.fromstring(content_img_bytes.eval(), np.uint8)
+      s.close()
+
+      content_img = ut.get_img(content_img_np,
+                             width=-1,
+                             height=-1)
+      content_img_height = content_img.shape[0]
+      content_img_width = content_img.shape[1]
+
+      args.content_img_height, args.content_img_width = \
+          ut.resize_with_ratio(height=args.content_img_height or content_img_height,
+                               width=args.content_img_width or content_img_width,
+                               size=args.content_img_size)
+
+      model = plfrtst.StyleTransfer(
+          model_name=args.model_name or 'vgg19',
+          tensorflow_model_path=args.tensorflow_model_path
+              or 'pretrained_models/vgg19/model/tensorflow/conv_wb.pkl',
+          data_path=args.data_path
+              or 'perceptual_losses_for_real_time_style_transfer/dataset',
+          content_img_height=args.content_img_height or 256,
+          content_img_width=args.content_img_width or 256,
+          content_img_channels=args.content_img_channels or 3,
+          style_img_height=args.style_img_height or 256,
+          style_img_width=args.style_img_width or 256,
+          style_img_channels=args.style_img_channels or 3,
+          content_layers=args.content_layers or ['relu4_2'],
+          style_layers=args.style_layers
+              or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
+          style_layers_w=args.style_layers_w
+              or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
+          alfa=args.alfa or 100.0,
+          beta=args.beta or 1.0,
+          gamma=args.gamma or 0.001,
+          batch_size=args.batch_size or 1,
+          no_epochs=args.no_epochs or 2,
+          learning_rate=args.learning_rate or 0.001)
+
+      output_img_path = args.output_img_path or 'results/plfrtst_predict'
+      # if tf.gfile.IsDirectory(output_img_path):
+        # tf.gfile.DeleteRecursively(output_img_path)
+      tf.gfile.MakeDirs(output_img_path)
+
+      model_path = args.model_path or 'models/model_freeze.ckpt'
+
+      model.build()
+      model.predict(
+          model_path=model_path,
+          content_img_path=content_img_path,
+          output_img_path=output_img_path)
     else:
       print('Nothing to be done!')
   elif args.method == 'dpst':
