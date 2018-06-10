@@ -370,7 +370,7 @@ if __name__ == '__main__':
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
           alfa=args.alfa or 1.0,
           beta=args.beta or 100.0,
-          gamma=args.gamma or 100.0,
+          gamma= 0.0 if args.gamma == 0.0 else args.gamma or 100.0,
           llambda=args.llambda or 0.001,
           learning_rate=args.learning_rate or 2,
           num_iters=args.num_iters or 2000)
