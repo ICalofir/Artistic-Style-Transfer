@@ -25,7 +25,8 @@ if __name__ == '__main__':
                       help='if true, start training a neural network',
                       action='store_true')
   parser.add_argument('--resume',
-                      help='')
+                      help='',
+                      action='store_true')
   parser.add_argument('--predict',
                       action='store_true')
   parser.add_argument('--model_name',
@@ -266,7 +267,8 @@ if __name__ == '__main__':
           style_img_path=style_img_path,
           output_img_path=output_img_path,
           tensorboard_path=tensorboard_path,
-          resume=args.resume or False)
+          resume=args.resume or False,
+          checkpoints_path=checkpoints_path)
     elif args.predict:
       ut = Utils()
       content_img_path = args.content_img_path or 'images/content/content1.jpg'

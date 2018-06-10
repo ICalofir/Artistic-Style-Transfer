@@ -175,21 +175,22 @@ class StyleTransfer():
             output_img_path='results/plfrtst',
             tensorboard_path='tensorboard/tensorboard_plfrtst',
             model_path='models',
-            resume=False):
+            resume=False,
+            checkpoints_path='checkpoints'):
     saver = tf.train.Saver()
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       if resume == True:
         model_path_pickle = pickle.loads(sess.run(self.file_bytes,
-            feed_dict={self.name_file: 'checkpoints/model_path.pkl'}))
+            feed_dict={self.name_file: checkpoints_path + '/model_path.pkl'}))
         saver.restore(sess, model_path_pickle)
 
         ut = pickle.loads(sess.run(self.file_bytes,
-            feed_dict={self.name_file: 'checkpoints/utils.pkl'}))
+            feed_dict={self.name_file: checkpoints_path + '/utils.pkl'}))
         ep = pickle.loads(sess.run(self.file_bytes,
-            feed_dict={self.name_file: 'checkpoints/epoch.pkl'}))
+            feed_dict={self.name_file: checkpoints_path + '/epoch.pkl'}))
         i = pickle.loads(sess.run(self.file_bytes,
-            feed_dict={self.name_file: 'checkpoints/iteration.pkl'})) + 1
+            feed_dict={self.name_file: checkpoints_path + '/iteration.pkl'})) + 1
       else:
         sess.run(tf.global_variables_initializer())
         ut = Utils(data_path=self.data_path)
@@ -286,16 +287,16 @@ class StyleTransfer():
             saver.save(sess, model_path + '/model_freeze_' + str(ep) + '_' + str(i)  + '_.ckpt')
             model_path_pickle_save = model_path + '/model_freeze_' + str(ep) + '_' + str(i)  + '_.ckpt'
             sess.run(self.fwrite_pickle,
-                feed_dict={self.name_file: 'checkpoints/model_path.pkl',
+                feed_dict={self.name_file: checkpoints_path + '/model_path.pkl',
                            self.pickle_file: pickle.dumps(model_path_pickle_save)})
             sess.run(self.fwrite_pickle,
-                feed_dict={self.name_file: 'checkpoints/utils.pkl',
+                feed_dict={self.name_file: checkpoints_path + '/utils.pkl',
                            self.pickle_file: pickle.dumps(ut)})
             sess.run(self.fwrite_pickle,
-                feed_dict={self.name_file: 'checkpoints/epoch.pkl',
+                feed_dict={self.name_file: checkpoints_path + '/epoch.pkl',
                            self.pickle_file: pickle.dumps(ep)})
             sess.run(self.fwrite_pickle,
-                feed_dict={self.name_file: 'checkpoints/iteration.pkl',
+                feed_dict={self.name_file: checkpoints_path + '/iteration.pkl',
                            self.pickle_file: pickle.dumps(i)})
 
           i = i + 1

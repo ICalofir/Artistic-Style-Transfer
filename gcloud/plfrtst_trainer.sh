@@ -1,6 +1,6 @@
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 BUCKET_NAME=${PROJECT_ID}-mlengine
-REGION=us-central1
+REGION=europe-west1
 JOB_NAME=$1
 STAGING_BUCKET=gs://$BUCKET_NAME
 
@@ -18,6 +18,7 @@ STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$9
 OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/plfrtst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
 TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_plfrtst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
 MODEL_PATH=gs://$BUCKET_NAME/models/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
+CHECKPOINTS_PATH=gs://$BUCKET_NAME/checkpoints/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
 
 gcloud ml-engine jobs submit training $JOB_NAME \
     --staging-bucket=${STAGING_BUCKET} \
@@ -41,4 +42,5 @@ gcloud ml-engine jobs submit training $JOB_NAME \
     --content_img_path $CONTENT_IMG_PATH \
     --style_img_path $STYLE_IMG_PATH \
     --output_img_path $OUTPUT_IMG_PATH \
-    --tensorboard_path $TENSORBOARD_PATH
+    --tensorboard_path $TENSORBOARD_PATH \
+    --checkpoints_path $CHECKPOINTS_PATH
