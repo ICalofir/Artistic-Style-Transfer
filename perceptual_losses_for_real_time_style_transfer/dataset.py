@@ -1,7 +1,9 @@
 import json
 import os
 import random
+import tensorflow as tf
 import numpy as np
+from io import BytesIO
 
 class Dataset:
   def __init__(self,
@@ -46,23 +48,46 @@ class Dataset:
     return x_batch
 
   def _get_dataset(self):
-    self._x_val = []
-    if os.path.exists(self.data_path + '/anno/val.txt'):
-      with open(self.data_path + '/anno/val.txt') as f:
-        for line in f:
-          img_line = line.rstrip() # remove newline
-          self._x_val.append(img_line)
+    s = tf.InteractiveSession()
+    val_tf = tf.read_file(self.data_path + '/anno/val.txt')
+    train_tf = tf.read_file(self.data_path + '/anno/train.txt')
 
-        random.shuffle(self._x_val)
+    val_bytes = val_tf.eval()
+    train_bytes = train_tf.eval()
+    s.close()
+
+    val_imgs = BytesIO(val_bytes).read().decode('utf-8').split('\n')
+    train_imgs = BytesIO(train_bytes).read().decode('utf-8').split('\n')
+
+    self._x_val = []
+    for line in val_imgs:
+      img_line = line.rstrip() # remove newline
+      self._x_val.append(img_line)
+    random.shuffle(self._x_val)
 
     self._x_train = []
-    if os.path.exists(self.data_path + '/anno/train.txt'):
-      with open(self.data_path + '/anno/train.txt') as f:
-        for line in f:
-          img_line = line.rstrip() # remove newline
-          self._x_train.append(img_line)
+    for line in train_imgs:
+      img_line = line.rstrip() # remove newline
+      self._x_train.append(img_line)
+    random.shuffle(self._x_train)
 
-        random.shuffle(self._x_train)
+    # self._x_val = []
+    # if os.path.exists(self.data_path + '/anno/val.txt'):
+      # with open(self.data_path + '/anno/val.txt') as f:
+        # for line in f:
+          # img_line = line.rstrip() # remove newline
+          # self._x_val.append(img_line)
+
+        # random.shuffle(self._x_val)
+
+    # self._x_train = []
+    # if os.path.exists(self.data_path + '/anno/train.txt'):
+      # with open(self.data_path + '/anno/train.txt') as f:
+        # for line in f:
+          # img_line = line.rstrip() # remove newline
+          # self._x_train.append(img_line)
+
+        # random.shuffle(self._x_train)
 
   @staticmethod
   def build_dataset_coco_microsoft(
