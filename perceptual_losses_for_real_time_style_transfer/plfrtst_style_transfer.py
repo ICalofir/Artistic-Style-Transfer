@@ -1,4 +1,5 @@
 import cv2
+import pickle
 import numpy as np
 import tensorflow as tf
 
@@ -166,19 +167,37 @@ class StyleTransfer():
 
     self.file_bytes = tf.read_file(self.name_file)
 
+    self.pickle_file = tf.placeholder(tf.string)
+    self.fwrite_pickle = tf.write_file(self.name_file, self.pickle_file)
+
   def train(self,
             style_img_path='images/style/style1.jpg',
             output_img_path='results/plfrtst',
             tensorboard_path='tensorboard/tensorboard_plfrtst',
-            model_path='models'):
+            model_path='models',
+            resume=False):
     saver = tf.train.Saver()
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
-      sess.run(tf.global_variables_initializer())
+      if resume == True:
+        model_path_pickle = pickle.loads(sess.run(self.file_bytes,
+            feed_dict={self.name_file: 'checkpoints/model_path.pkl'}))
+        saver.restore(sess, model_path_pickle)
+
+        ut = pickle.loads(sess.run(self.file_bytes,
+            feed_dict={self.name_file: 'checkpoints/utils.pkl'}))
+        ep = pickle.loads(sess.run(self.file_bytes,
+            feed_dict={self.name_file: 'checkpoints/epoch.pkl'}))
+        i = pickle.loads(sess.run(self.file_bytes,
+            feed_dict={self.name_file: 'checkpoints/iteration.pkl'})) + 1
+      else:
+        sess.run(tf.global_variables_initializer())
+        ut = Utils(data_path=self.data_path)
+        ep = 0
+        i = 0
 
       writer = tf.summary.FileWriter(tensorboard_path)
       writer.add_graph(sess.graph)
-      ut = Utils(data_path=self.data_path)
 
       y_batch = []
       style_img_bytes = sess.run(self.file_bytes,
@@ -190,10 +209,11 @@ class StyleTransfer():
                                   height=self.style_img_height))
       y_batch = np.array(y_batch).astype(np.float32)
 
-      ep = 0
-      i = 0
       while ep < self.no_epochs:
-        ut = Utils(data_path=self.data_path)
+        if resume == False: # if resume=True use ut from the last checkpoint
+          ut = Utils(data_path=self.data_path) # shuffle data every epoch
+        else:
+          resume = False
         while True:
           x_batch_transform_name, batch_end = ut.next_batch_train(self.batch_size)
           x_batch_transform = []
@@ -261,9 +281,25 @@ class StyleTransfer():
                                     self.content_img_vgg: x_batch_vgg,
                                     self.style_img: y_batch})
             writer.add_summary(s, i)
+
+          if i % 10000 == 0:
+            saver.save(sess, model_path + '/model_freeze_' + str(ep) + '_' + str(i)  + '_.ckpt')
+            model_path_pickle_save = model_path + '/model_freeze_' + str(ep) + '_' + str(i)  + '_.ckpt'
+            sess.run(self.fwrite_pickle,
+                feed_dict={self.name_file: 'checkpoints/model_path.pkl',
+                           self.pickle_file: pickle.dumps(model_path_pickle_save)})
+            sess.run(self.fwrite_pickle,
+                feed_dict={self.name_file: 'checkpoints/utils.pkl',
+                           self.pickle_file: pickle.dumps(ut)})
+            sess.run(self.fwrite_pickle,
+                feed_dict={self.name_file: 'checkpoints/epoch.pkl',
+                           self.pickle_file: pickle.dumps(ep)})
+            sess.run(self.fwrite_pickle,
+                feed_dict={self.name_file: 'checkpoints/iteration.pkl',
+                           self.pickle_file: pickle.dumps(i)})
+
           i = i + 1
         ep = ep + 1
-        saver.save(sess, model_path + '/model_freeze_' + str(ep) + '_.ckpt')
       saver.save(sess, model_path + '/model_freeze.ckpt')
 
   def predict(self,

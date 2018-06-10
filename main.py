@@ -24,6 +24,8 @@ if __name__ == '__main__':
   parser.add_argument('--train',
                       help='if true, start training a neural network',
                       action='store_true')
+  parser.add_argument('--resume',
+                      help='')
   parser.add_argument('--predict',
                       action='store_true')
   parser.add_argument('--model_name',
@@ -108,6 +110,10 @@ if __name__ == '__main__':
                       help='')
   parser.add_argument('--model_path',
                       help='')
+  parser.add_argument('--checkpoints_path',
+                      help='')
+  parser.add_argument('--output_img_init',
+                      help='')
 
   args = parser.parse_args()
 
@@ -168,7 +174,8 @@ if __name__ == '__main__':
           beta=args.beta or 100.0,
           gamma=args.gamma or 0.001,
           learning_rate=args.learning_rate or 2,
-          num_iters=args.num_iters or 2000)
+          num_iters=args.num_iters or 2000,
+          output_img_init=args.output_img_init or 'random')
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_anaoas'
       # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
@@ -250,12 +257,16 @@ if __name__ == '__main__':
         # tf.gfile.DeleteRecursively(model_path)
       tf.gfile.MakeDirs(model_path)
 
+      checkpoints_path = args.checkpoints_path or 'checkpoints'
+      tf.gfile.MakeDirs(checkpoints_path)
+
       model.build()
       model.train(
           model_path=model_path,
           style_img_path=style_img_path,
           output_img_path=output_img_path,
-          tensorboard_path=tensorboard_path)
+          tensorboard_path=tensorboard_path,
+          resume=args.resume or False)
     elif args.predict:
       ut = Utils()
       content_img_path = args.content_img_path or 'images/content/content1.jpg'
@@ -373,7 +384,8 @@ if __name__ == '__main__':
           gamma= 0.0 if args.gamma == 0.0 else args.gamma or 100.0,
           llambda=args.llambda or 0.001,
           learning_rate=args.learning_rate or 2,
-          num_iters=args.num_iters or 2000)
+          num_iters=args.num_iters or 2000,
+          output_img_init=args.output_img_init or 'random')
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_dpst'
       # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this

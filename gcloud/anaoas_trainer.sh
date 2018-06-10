@@ -8,6 +8,7 @@ METHOD_NAME=anaoas
 TENSORFLOW_MODEL_PATH=gs://$BUCKET_NAME/pretrained_models/vgg19/model/tensorflow/conv_wb.pkl
 CONTENT_IMG_SIZE=${10}
 STYLE_IMG_SIZE=${11}
+OUTPUT_IMG_INIT=${12}
 ALFA=$2
 BETA=$3
 GAMMA=$4
@@ -16,8 +17,8 @@ NUM_ITERS=$6
 CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$7
 STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$8
 NOISE_IMG_PATH=gs://$BUCKET_NAME/images/content/$9
-OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
-TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
+OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}_${OUTPUT_IMG_INIT}
+TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_anaoas/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}_${OUTPUT_IMG_INIT}
 
 gcloud ml-engine jobs submit training $JOB_NAME \
     --staging-bucket=${STAGING_BUCKET} \
@@ -41,4 +42,5 @@ gcloud ml-engine jobs submit training $JOB_NAME \
     --style_img_path $STYLE_IMG_PATH \
     --noise_img_path $NOISE_IMG_PATH \
     --output_img_path $OUTPUT_IMG_PATH \
-    --tensorboard_path $TENSORBOARD_PATH
+    --tensorboard_path $TENSORBOARD_PATH \
+    --output_img_init $OUTPUT_IMG_INIT

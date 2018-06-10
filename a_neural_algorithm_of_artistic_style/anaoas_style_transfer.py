@@ -28,7 +28,8 @@ class StyleTransfer():
       beta=100.0,
       gamma=0.001,
       learning_rate=2,
-      num_iters=2000):
+      num_iters=2000,
+      output_img_init='random'):
     self.model_name = model_name
     self.tensorflow_model_path = tensorflow_model_path
 
@@ -51,6 +52,8 @@ class StyleTransfer():
 
     self.learning_rate = learning_rate
     self.num_iters = num_iters
+
+    self.output_img_init = output_img_init
 
   def _get_content_loss(self, content_layer, noise_layer):
     content_loss = tf.constant(0.0)
@@ -113,15 +116,18 @@ class StyleTransfer():
 
     self.noise_img_init = tf.placeholder(tf.float32, [1, self.noise_img_height,
                 self.noise_img_width, self.noise_img_channels])
-    # self.noise_img = tf.get_variable(name='output_image',
-                                     # initializer=self.noise_img_init)
-    # xavier init
-    self.noise_img = tf.get_variable(name='output_image',
-                                     shape=[1,
-                                            self.noise_img_height,
-                                            self.noise_img_width,
-                                            self.noise_img_channels],
-                                     initializer=None)
+
+    if self.output_img_init == 'content':
+      self.noise_img = tf.get_variable(name='output_image',
+                                       initializer=self.noise_img_init)
+    elif self.output_img_init == 'random':
+      # xavier init
+      self.noise_img = tf.get_variable(name='output_image',
+                                       shape=[1,
+                                              self.noise_img_height,
+                                              self.noise_img_width,
+                                              self.noise_img_channels],
+                                       initializer=None)
 
     self.total_variation_loss = self._get_total_variation_loss(self.noise_img)
 

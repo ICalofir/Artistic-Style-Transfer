@@ -1,6 +1,6 @@
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 BUCKET_NAME=${PROJECT_ID}-mlengine
-REGION=us-central1
+REGION=europe-west1
 JOB_NAME=$1
 STAGING_BUCKET=gs://$BUCKET_NAME
 
@@ -8,6 +8,7 @@ METHOD_NAME=dpst
 TENSORFLOW_MODEL_PATH=gs://$BUCKET_NAME/pretrained_models/vgg19/model/tensorflow/conv_wb.pkl
 CONTENT_IMG_SIZE=${14}
 STYLE_IMG_SIZE=${15}
+OUTPUT_IMG_INIT=${16}
 ALFA=$2
 BETA=$3
 GAMMA=$4
@@ -17,8 +18,8 @@ NUM_ITERS=$7
 CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$8
 STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$9
 NOISE_IMG_PATH=gs://$BUCKET_NAME/images/content/${10}
-OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}_${JOB_NAME}
-TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}_${JOB_NAME}
+OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}_${JOB_NAME}_${OUTPUT_IMG_INIT}
+TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_dpst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_llambda_${LLAMBDA}_lr_${LEARNING_RATE}_${JOB_NAME}_${OUTPUT_IMG_INIT}
 MASK_CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/mask/${11}
 MASK_STYLE_IMG_PATH=gs://$BUCKET_NAME/images/mask/${12}
 LAPLACIAN_MATRIX_PATH=gs://$BUCKET_NAME/images/laplacian/${13}
@@ -49,4 +50,5 @@ gcloud ml-engine jobs submit training $JOB_NAME \
     --tensorboard_path $TENSORBOARD_PATH \
     --mask_content_img_path $MASK_CONTENT_IMG_PATH \
     --mask_style_img_path $MASK_STYLE_IMG_PATH \
-    --laplacian_matrix_path $LAPLACIAN_MATRIX_PATH
+    --laplacian_matrix_path $LAPLACIAN_MATRIX_PATH \
+    --output_img_init $OUTPUT_IMG_INIT

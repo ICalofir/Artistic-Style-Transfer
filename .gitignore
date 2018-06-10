@@ -1,4 +1,5 @@
 archives
+checkpoints
 pretrained_models/vgg16
 pretrained_models/vgg19
 perceptual_losses_for_real_time_style_transfer/dataset
