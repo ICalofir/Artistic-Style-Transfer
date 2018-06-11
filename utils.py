@@ -64,7 +64,7 @@ class Utils():
 
     return new_height, new_width
 
-  def add_noise(self, img, noise_ratio=0.5):
+  def add_noise(self, img, noise_ratio=0.7):
     original_img = img.astype(np.float32)
     noise_img = np.random.normal(0.0,
                                  25.0,
