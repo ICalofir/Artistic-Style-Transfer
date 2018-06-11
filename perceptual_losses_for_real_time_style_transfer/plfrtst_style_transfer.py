@@ -283,7 +283,7 @@ class StyleTransfer():
                                     self.style_img: y_batch})
             writer.add_summary(s, i)
 
-          if i % 10000 == 0:
+          if i % 5000 == 0:
             saver.save(sess, model_path + '/model_freeze_' + str(ep) + '_' + str(i)  + '_.ckpt')
             model_path_pickle_save = model_path + '/model_freeze_' + str(ep) + '_' + str(i)  + '_.ckpt'
             sess.run(self.fwrite_pickle,
