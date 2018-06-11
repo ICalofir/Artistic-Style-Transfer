@@ -34,6 +34,7 @@ class StyleTransfer():
       learning_rate=2,
       num_iters=2000,
       output_img_init='random'):
+    self.vgg_means = [103.939, 116.779, 123.68] # BGR
     self.model_name = model_name
     self.tensorflow_model_path = tensorflow_model_path
 
@@ -207,8 +208,7 @@ class StyleTransfer():
       v_noise_img = tf.reshape(noise_img[:, :, :, c], [-1, 1])
       loss = tf.sparse_tensor_dense_matmul(laplacian_matrix, v_noise_img)
       loss = tf.matmul(tf.transpose(v_noise_img), loss)
-      loss = tf.scalar_mul(1.0 / (2.0 * self.content_img_height * self.content_img_width),
-                           tf.reduce_sum(loss))
+      loss = tf.reduce_sum(loss)
 
       photorealism_loss = photorealism_loss + loss
 
@@ -269,8 +269,9 @@ class StyleTransfer():
                                                      self.mask_style_img,
                                                      self.mask_content_img))
 
+    self.noise_img_normalized = (self.noise_img + self.vgg_means) / 255.0
     self.photorealism_loss = self._get_photorealism_loss(self.laplacian_matrix,
-                                                         self.noise_img)
+                                                         self.noise_img_normalized)
 
     if self.gamma == 0.0:
       self.total_loss = self.alfa * self.content_loss \
