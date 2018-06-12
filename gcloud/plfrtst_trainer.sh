@@ -15,10 +15,10 @@ BATCH_SIZE=$6
 NO_EPOCHS=$7
 CONTENT_IMG_PATH=gs://$BUCKET_NAME/images/content/$8
 STYLE_IMG_PATH=gs://$BUCKET_NAME/images/style/$9
-OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/plfrtst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_plfrtst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-MODEL_PATH=gs://$BUCKET_NAME/models/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
-CHECKPOINTS_PATH=gs://$BUCKET_NAME/checkpoints/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}
+OUTPUT_IMG_PATH=gs://$BUCKET_NAME/results/plfrtst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
+TENSORBOARD_PATH=gs://$BUCKET_NAME/tensorboard/tensorboard_plfrtst/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
+MODEL_PATH=gs://$BUCKET_NAME/models/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
+CHECKPOINTS_PATH=gs://$BUCKET_NAME/checkpoints/alfa_${ALFA}_beta_${BETA}_gamma_${GAMMA}_lr_${LEARNING_RATE}_${JOB_NAME}
 
 gcloud ml-engine jobs submit training $JOB_NAME \
     --staging-bucket=${STAGING_BUCKET} \
