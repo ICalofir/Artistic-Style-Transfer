@@ -103,8 +103,6 @@ if __name__ == '__main__':
                       help='')
   parser.add_argument('--mask_style_img_path',
                       help='')
-  parser.add_argument('--laplacian_matrix_path',
-                      help='')
   parser.add_argument('--output_img_path',
                       help='')
   parser.add_argument('--tensorboard_path',
@@ -171,21 +169,21 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 1.0,
-          beta=args.beta or 100.0,
-          gamma=args.gamma or 0.001,
+          alfa=0.0 if args.alfa == 0 else args.alfa or 100.0,
+          beta=0.0 if args.beta == 0 else args.beta or 1.0,
+          gamma=0.0 if args.gamma == 0 else args.gamma or 0.03,
           learning_rate=args.learning_rate or 2,
           num_iters=args.num_iters or 2000,
           output_img_init=args.output_img_init or 'random')
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_anaoas'
-      # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
-        # tf.gfile.DeleteRecursively(tensorboard_path)
+      if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
+        tf.gfile.DeleteRecursively(tensorboard_path)
       tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/anaoas'
-      # if tf.gfile.IsDirectory(output_img_path): # for gcloud comment this
-        # tf.gfile.DeleteRecursively(output_img_path)
+      if tf.gfile.IsDirectory(output_img_path): # for gcloud comment this
+        tf.gfile.DeleteRecursively(output_img_path)
       tf.gfile.MakeDirs(output_img_path)
 
       model.build()
@@ -236,30 +234,36 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 100.0,
-          beta=args.beta or 1.0,
-          gamma=args.gamma or 0.001,
-          batch_size=args.batch_size or 1,
+          alfa=0.0 if args.alfa == 0 else args.alfa or 1000.0,
+          beta=0.0 if args.beta == 0 else args.beta or 1.0,
+          gamma=0.0 if args.gamma == 0 else args.gamma or 0.03,
+          batch_size=args.batch_size or 2,
           no_epochs=args.no_epochs or 2,
           learning_rate=args.learning_rate or 0.001)
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_plfrtst'
-      # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
-        # tf.gfile.DeleteRecursively(tensorboard_path)
-      tf.gfile.MakeDirs(tensorboard_path)
+      if args.resume is None or args.resume == False:
+        if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
+          tf.gfile.DeleteRecursively(tensorboard_path)
+        tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/plfrtst'
-      # if tf.gfile.IsDirectory(output_img_path):
-        # tf.gfile.DeleteRecursively(output_img_path)
-      tf.gfile.MakeDirs(output_img_path)
+      if args.resume is None or args.resume == False:
+        if tf.gfile.IsDirectory(output_img_path): # for gcloud comment this
+          tf.gfile.DeleteRecursively(output_img_path)
+        tf.gfile.MakeDirs(output_img_path)
 
       model_path = args.model_path or 'models'
-      # if tf.gfile.IsDirectory(model_path): # for gcloud comment this
-        # tf.gfile.DeleteRecursively(model_path)
-      tf.gfile.MakeDirs(model_path)
+      if args.resume is None or args.resume == False:
+        if tf.gfile.IsDirectory(model_path): # for gcloud comment this
+          tf.gfile.DeleteRecursively(model_path)
+        tf.gfile.MakeDirs(model_path)
 
       checkpoints_path = args.checkpoints_path or 'checkpoints'
-      tf.gfile.MakeDirs(checkpoints_path)
+      if args.resume is None or args.resume == False:
+        if tf.gfile.IsDirectory(checkpoints_path): # for gcloud comment this
+          tf.gfile.DeleteRecursively(checkpoints_path)
+        tf.gfile.MakeDirs(checkpoints_path)
 
       model.build()
       model.train(
@@ -307,19 +311,19 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 100.0,
-          beta=args.beta or 1.0,
-          gamma=args.gamma or 0.001,
-          batch_size=args.batch_size or 1,
+          alfa=0.0 if args.alfa == 0 else args.alfa or 1000.0,
+          beta=0.0 if args.beta == 0 else args.beta or 1.0,
+          gamma=0.0 if args.gamma == 0 else args.gamma or 0.03,
+          batch_size=args.batch_size or 2,
           no_epochs=args.no_epochs or 2,
           learning_rate=args.learning_rate or 0.001)
 
       output_img_path = args.output_img_path or 'results/plfrtst_predict'
-      # if tf.gfile.IsDirectory(output_img_path):
-        # tf.gfile.DeleteRecursively(output_img_path)
+      if tf.gfile.IsDirectory(output_img_path):
+        tf.gfile.DeleteRecursively(output_img_path)
       tf.gfile.MakeDirs(output_img_path)
 
-      model_path = args.model_path or 'models/model_freeze.ckpt'
+      model_path = args.model_path or 'models_freeze/model_freeze_s1.ckpt'
 
       model.build()
       model.predict(
@@ -331,9 +335,9 @@ if __name__ == '__main__':
   elif args.method == 'dpst':
     if args.train:
       ut = Utils()
-      content_img_path = args.content_img_path or 'images/content/d_content1_resized.png'
-      style_img_path = args.style_img_path or 'images/style/d_style1.png'
-      noise_img_path = args.noise_img_path or 'images/content/d_content1_resized.png'
+      content_img_path = args.content_img_path or 'images/content/d_content6_resized.png'
+      style_img_path = args.style_img_path or 'images/content/d_content6_resized.png'
+      noise_img_path = args.noise_img_path or 'images/content/d_content6_resized.png'
 
       s = tf.InteractiveSession()
       content_img_bytes = tf.read_file(content_img_path)
@@ -381,22 +385,21 @@ if __name__ == '__main__':
               or ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
           style_layers_w=args.style_layers_w
               or [1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-          alfa=args.alfa or 1.0,
-          beta=args.beta or 100.0,
-          gamma= 0.0 if args.gamma == 0.0 else args.gamma or 100.0,
-          llambda=args.llambda or 0.001,
+          alfa=0.0 if args.alfa == 0 else args.alfa or 100.0,
+          beta=0.0 if args.beta == 0 else args.beta or 1.0,
+          gamma=0.0 if args.gamma == 0 else args.gamma or 0.03,
           learning_rate=args.learning_rate or 2,
           num_iters=args.num_iters or 2000,
           output_img_init=args.output_img_init or 'random')
 
       tensorboard_path = args.tensorboard_path or 'tensorboard/tensorboard_dpst'
-      # if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
-        # tf.gfile.DeleteRecursively(tensorboard_path)
+      if tf.gfile.IsDirectory(tensorboard_path): # for gcloud comment this
+        tf.gfile.DeleteRecursively(tensorboard_path)
       tf.gfile.MakeDirs(tensorboard_path)
 
       output_img_path = args.output_img_path or 'results/dpst'
-      # if tf.gfile.IsDirectory(output_img_path): # for gcloud comment this
-        # tf.gfile.DeleteRecursively(output_img_path)
+      if tf.gfile.IsDirectory(output_img_path): # for gcloud comment this
+        tf.gfile.DeleteRecursively(output_img_path)
       tf.gfile.MakeDirs(output_img_path)
 
       model.build()
@@ -405,11 +408,9 @@ if __name__ == '__main__':
           style_img_path=style_img_path,
           noise_img_path=noise_img_path,
           mask_content_img_path=args.mask_content_img_path \
-                                  or 'images/mask/mask_d_content1.png',
+                                  or 'images/mask/mask_d_content6_resized.png',
           mask_style_img_path=args.mask_style_img_path \
-                                  or 'images/mask/mask_d_style1.png',
-          laplacian_matrix_path=args.laplacian_matrix_path \
-                                  or 'images/laplacian/d_laplacian1_resized.mat',
+                                  or 'images/mask/mask_d_style6_resized.png',
           output_img_path=output_img_path,
           tensorboard_path=tensorboard_path)
     else:
