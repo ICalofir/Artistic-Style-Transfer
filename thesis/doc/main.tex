@@ -1,0 +1,123 @@
+%--------------------
+% SETARI
+%--------------------
+\documentclass[
+	12pt, % mărimea fontului
+	twoside % pentru ambele părti ale paginii
+]{report}
+\usepackage[english, romanian]{babel} % text în engleză sau în română
+\usepackage[utf8]{inputenc} % utf-8
+
+%\renewcommand{\baselinestretch}{1.5}
+\usepackage{setspace} % spațiul dintre rânduri
+\setstretch{1.5} % spațiul dintre rânduri
+
+\usepackage{mathptmx} % times new roman font
+
+\usepackage{geometry}
+\geometry{
+	paper=a4paper, % stilul documentului
+	inner=2.5cm, % marginea interioară
+	outer=3.8cm, % marginea exeterioară
+	bindingoffset=.5cm, % binding offset
+	top=3.1cm, % marginea de sus
+	bottom=3.1cm, % marginea de jos
+	portrait
+}
+
+\usepackage{amsmath} % math symbols
+
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+\titleformat{\paragraph}[runin]
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titleformat{\subparagraph}[runin]
+{\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+
+\titlespacing*{\chapter}{0pt}{10pt}{10pt}
+\titlespacing*{\section}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titlespacing*{\subsubsection}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1em}
+\titlespacing*{\subparagraph}{\parindent}{3.25ex plus 1ex minus .2ex}{1em}
+
+\usepackage[section]{placeins}
+\usepackage{float}
+\usepackage{graphicx} % încărcarea imaginilor
+\graphicspath{{imagini/}}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{fancyhdr} % header și footer
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[LO, RE]{Petrișor-Ionuț Calofir}
+\fancyhead[RO, LE]{Transferul Stilului Artistic}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+%--------------------
+% BIBLIOGRAFIE LICENTA
+%-------------------
+\usepackage{url}
+\usepackage[backend=bibtex, natbib=true, sorting=ynt]{biblatex}
+\addbibresource{bibliografie.bib}
+\usepackage[autostyle=false]{csquotes}
+
+%--------------------
+% TITLU LICENTA
+%-------------------
+\title{Transferul Stilului Artistic}
+\author{Petrișor-Ionuț Calofir}
+\date{1 Iunie 2018}
+
+%--------------------
+% LICENTA
+%--------------------
+\begin{document}
+
+\input{coperta}
+\input{titlu}
+
+\tableofcontents\thispagestyle{fancy}
+
+\chapter{Transferul stilului artistic}\thispagestyle{fancy}
+\input{capitole/introducere}
+
+\chapter{Un algoritm neural al stilului artistic}\thispagestyle{fancy}
+\label{anaoas}
+\input{capitole/anaoas}
+
+\chapter{Transferul stilului artistic fotografic}\thispagestyle{fancy}
+\label{dpst}
+\input{capitole/dpst}
+
+\chapter{Transferul stilului artistic în timp real}\thispagestyle{fancy}
+\label{plfrtst}
+\input{capitole/plfrtst}
+
+\chapter{Compararea metodelor}\thispagestyle{fancy}
+\input{capitole/compararea_metodelor}
+
+\chapter{Concluzii}\thispagestyle{fancy}
+\input{capitole/concluzii}
+
+\printbibliography[title=Bibliografie]\thispagestyle{fancy}
+
+\end{document}

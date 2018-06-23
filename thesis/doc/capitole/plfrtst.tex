@@ -1,0 +1,251 @@
+\section{Introducere}
+Deși metodele prezentate în capitolele [\ref{anaoas}] și [\ref{dpst}] demonstrează faptul că se pot obține poze artistice combinând conținutul și stilul a două poze, timpul necesar pentru generarea unei astfel de poze este unul destul de mare. În acest capitol voi prezenta o soluție la problema de mai sus descrisă de Justin Johnson în articolul său \cite{johnson2016}. După cum știm, se poate antrena o rețea neurală convoluțională pentru a rezolva diferite probleme care conțin imagini, precum recunoașterea de obiecte sau segmentarea obiectelor dintr-o poză. Plecând de la această idee și folosind metoda lui Leon A. Gatys de separare a stilului și conținutului, Justin Johnson propune antrenarea unei rețele neurale convoluționale pentru a învăța să aplice un anumit stil pe o poză.
+
+În cele ce urmează voi arăta că soluția lui Justin Johnson este una fiabilă, obținând rezultate asemănătoare cu cele date de algoritmul lui Leon A. Gatys. Pe lângă faptul acesta, timpul de generare a unei poze artistice este redus semnificativ, deoarece este nevoie doar de o parcurgere a pozei inițiale prin rețea, singura parte care necesită un timp mai mare fiind aceea de antrenare a rețelei.
+
+\section{Metodă}
+Pentru a putea antrena o rețea neurală convoluțională care să învețe să aplice un anumit stil pe poze este nevoie să ne definim o funcție de cost. Ne vom folosi de funcțiile de cost prezentate în capitolul Un algoritm neural al stilului artistic [\ref{anaoas}]. Și anume, funcția de cost pentru conținut este cea definită la [\ref{eq:content_loss}], funcția de cost pentru stil este cea definită la [\ref{eq:style_loss}], funcția de zgomot pentru poza care urmează să fie generată este cea definită la [\ref{eq:tv_loss}] și funcția de cost finală este cea de la [\ref{eq:total_loss}].
+
+\section{Detalii de implementare}
+Deoarece această metodă este diferită de cele doua prezentate anterior, procedeul pe care l-am urmat pentru a implementa-o este diferit. În primul rând este necesar să antrenez o rețea neurală convoluțională care să învețe să aplice un anumit stil. Așadar am folosit rețeaua propusă de Justin Johnson în articolul său, pe care a numit-o Transform Net. Arhitectura acestei rețele se poate observa în imaginea [\ref{fig:transform_net_arh}]. În această imagine, $C$ $x$ $H$ $x$ $W$ $conv$ este interpretat astfel: $C$ este numărul de filtre din layer, $H$ este lungimea filtrului, iar $W$ este lățimea filtrului. $Stride$ $n$ este numărul de pixeli pe care să îl sară filtrul atunci când este plimbat pe imagine. De asemenea se observă că apar și 5 blocuri reziduale [\ref{fig:res_block}]. După fiecare layer non-rezidual este aplicată o normalizare a batch-ului [\ref{sb:batch_norm}] urmată de funcția de activare ReLU, mai puțin pentru ultimul layer, unde în loc de ReLU este folosită funcția de activare tanh (tangenta hiperbolică) [\ref{sb:tanh}] pentru că ne dorim ca pixelii pozei întoarse de rețea să fie între $[-1, 1]$. Arhitectura acestei rețele este una interesantă deoarece inițial, rețeaua reduce dimensiunea pozei de intrare până la un anumit punct pentru a putea învăța caracteristici mai complexe, apoi la această dimensiune sunt aplicate o serie de blocuri reziduale, iar mai apoi imaginea este mărită cu ajutorul layerelor ce poartă numele de layere convoluționale transpuse ajungând la dimensiunea inițială.
+
+La fel ca și la metoda lui Leon A. Gatys, algoritmul primește ca date de intrare două poze, una cu conținutul dorit și una cu stilul. La acest algoritm nu mai este nevoie să fie inițializată cu zgomot aleator o a treia poză deoarece este folosită rețeaua să învețe aplicarea stilului respectiv. Așadar, poza de conținut am normalizat-o și am trecut-o prin rețeaua Transform Net obținând o imagine nouă. Apoi am trecut cele trei poze, poza obținută de la Transform Net, poza cu conținutul și poza cu stilul prin rețeaua VGG19, și la fel ca la metoda lui Leon A. Gatys, am salvat activările din layerul \textit{conv4{\_}2} pentru conținut și activările din layerele \textit{conv1{\_}1}, \textit{conv2{\_}1}, \textit{conv3{\_}1}, \textit{conv4{\_}1}, \textit{conv5{\_}1} pentru stil pentru a putea calcula funcțiile de cost. Pe baza acestor funcții de cost, cu ajutorul algoritmului de coborâre pe gradient și a metodei backpropagation am optimizat valorile filtrelor pentru a obține un cost total cât mai mic.
+
+În imaginea \ref{fig:transform_vgg_workflow} se poate observa procesul pe care l-am descris mai sus.
+
+\begin{figure}[H]
+		\centering
+        \includegraphics[width=\textwidth]{transform_vgg_workflow}
+        \caption{Workflow-ul algoritmului}
+        \label{fig:transform_vgg_workflow}
+\end{figure}
+
+Pentru a învăța aplicarea unui anumit stil, rețeaua Transform Net are nevoie de multe poze cu conținut. De aceea, pentru antrenare, am folosit setul de date Microsoft COCO [\ref{sb:microsoft_coco}]. Setul de antrenare conține aproximativ $80000$ de poze. Pentru rezultatele din această lucrare am antrenat rețeaua timp de $10000$ de iterații, fiecare iterație conținând un batch de 4 poze luate aleator din setul de antrenare pe care le-am redimensionat la dimensiunea de $256$ $x$ $256$ pixeli. De asemenea și poza cu conținut și poza cu stil le-am redimensionat la $256$ $x$ $256$ de pixeli. Antrenarea a durat aproximativ 7 ore pe Google Cloud, pe o placă video NVIDIA Tesla K80.
+
+Parametrii folosiți în timpul antrenării au fost $\alpha = 1000$, $\beta = 1$ și rata de învățare egală cu 0.001.
+
+\begin{figure}[h]
+	\centering
+    \begin{subfigure}[b]{0.4\textwidth}
+		\centering
+        \includegraphics[height=8cm, width=1.4\textwidth]{transform_net}
+        \caption{Arhitectura rețelei \cite{johnson2016_supp}}
+        \label{fig:transform_net_arh}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.4\textwidth}
+		\centering
+        \includegraphics[height=8cm, width=\textwidth]{res_block}
+        \caption{Bloc rezidual \cite{johnson2016_supp}}
+        \label{fig:res_block}
+	\end{subfigure}
+\end{figure}
+
+\subsection{Normalizarea datelor}
+\label{sb:normalize}
+\cite{coursera_deep_learning} Pentru antrenarea unei rețele neurale trebuie ca datele de intrare să fie normalizate. Această practică are mai multe avantaje. Un avantaj este acela că, dacă de exemplu datele de intrare depind de două caracteristici, prima caracteristică fiind în intervalul $[0, 1]$, iar a doua în intervalul $[0, 1000]$ și având o funcție pe care dorim să o minimizăm și care depinde de cele două variabile, atunci dacă afișăm conturul funcției, acesta va avea formă de oval, iar ca algoritmul folosit pentru a minimiza această funcție să conveargă către minim va avea nevoie de un timp mai mare. De aceea, dacă datele sunt normalizate, toate caracteristicile aflându-se în același interval, atunci antrenarea se va face mult mai repede, deoarece conturul funcției va avea forma mai rotundă. Un alt avantaj este acela că dacă toate caracteristicile se află în același interval, atunci acestea vor contribui în mod egal la costul unei funcții, altfel dacă luăm tot exemplul de mai sus, atunci caracteristica ce se află în intervalul $[0, 1000]$ va avea un impact mai mare asupra valorii funcției și rețeaua va tinde să îi acorde o importanță mai mare.
+
+\subsection{Normalizarea batch-ului}
+\label{sb:batch_norm}
+\cite{coursera_deep_learning} După cum am spus în subcapitolul anterior, normalizarea datelor poate ajuta rețeaua să învețe mai repede și mai bine. De aceea, și la normalizarea batch-ului vom folosi aceeași idee, de a păstra datele într-un anumit interval. Normalizarea batch-ului înseamnă de fapt normalizarea activărilor înainte ca acestea să fie date ca intrare la următorul layer. Așadar, pentru normalizare, vom folosi următoarea formulă:
+
+\begin{equation}
+x = \frac{\gamma(x - \mu)}{\sigma + \epsilon} + \beta
+\end{equation}
+
+Unde $x$ este valoarea unei activări, $\mu$ este media tuturor activărilor, $\sigma$ este varianța, $\epsilon$ este un număr foarte mic pentru a se evita împărțirea la 0, iar $\gamma$ și $\beta$ sunt parametri pe care îi invață rețeaua. Ce este interesant, este faptul că dacă $\gamma = \sigma$ și $\beta = \mu$ atunci practic nu se aplică nicio normalizare, deci rețeaua poate învăța și lucrul acesta.
+
+\subsection{Tangenta hiperbolică}
+\label{sb:tanh}
+Tangenta hiperbolică \cite{wiki_tanh} este tot o funcție neliniară de activare, precum ReLU, aceasta având valori intre $[-1, 1]$. Formula acesteia este:
+
+\begin{equation}
+f(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+\end{equation}
+
+\subsection{Layer transpus de convoluție}
+\label{sb:transpose_convolution}
+Layerul transpus de convoluție merge pe același principiu cu cel al layerului de convoluție, doar că în cazul astă de la o imagine de o dimensiune oarecare, se dorește obținerea unei imagini de dimensiune mai mare. În figura [\ref{fig:transpose_conv}] se poate observa ideea acestui layer.
+
+\begin{figure}[H]
+		\centering
+        \includegraphics[height=7cm, width=\textwidth]{transpose_conv}
+        \caption{Convoluție transpusă \cite{transpose_conv}}
+        \label{fig:transpose_conv}
+\end{figure}
+
+După cum se observă și în poză, pe rând, pixelii din poza inițială se vor înmulți cu valorile filtrului care se plimbă pe poza mărită, iar aceste valori se vor copia în locurile respective. În locurile unde mai mule filtre se suprapun, se vor aduna valorile. De asemenea se poate decide câți pixeli să sară un filtru atunci când este plimbat pe poza mărită, în cazul de față, filtrul sare peste 2 pixeli.
+
+\subsection{Rețele reziduale}
+\label{sb:resnet}
+Rețelele neurale reziduale \cite{coursera_deep_learning} au fost introduse pentru a fi posibilă antrenarea unor rețele foarte adânci. Dacă în teorie, mărirea numărului de layere ar însemna ca rețeaua să învețe mai bine pe setul de antrenare, în practică s-a dovedit contrariul, o cauză fiind numărul foarte mare de parametri pe care rețeaua trebuie să îi optimizeze. Așadar, introducerea de blocuri reziduale permite crearea de rețele adânci care să obțină performanțe cel puțin la fel de bune ca o rețea nu la fel de adâncă.
+
+\begin{figure}[H]
+		\centering
+        \includegraphics[height=4cm, width=\textwidth]{resnet}
+        \caption{Arhitectura unei rețele reziduale \cite{res_net}}
+        \label{fig:resnet}
+\end{figure}
+
+După cum se poate vedea în figura [\ref{fig:resnet}], rețelele reziduale, introduc conexiuni care sar peste anumite layere, numite blocuri reziduale. Așadar introducerea acestora nu afectează cu nimic rău rețeaua, aceasta putând învăța să aplice funcția identitate în interiorul blocurilor pentru a le ignora, ci doar să îmbunătățească performanța rețelei.
+
+\subsection{Microsoft COCO}
+\label{sb:microsoft_coco}
+Microsoft Common Objects in COntext (COCO) \cite{microsoft_coco} este tot un set de date asemănător cu ImageNet ce conține un număr impresionant de imagini adnotate, care pot fi folosite în diferite probleme, precum segmentarea imaginii sau recunoașterea de obiecte dintr-o imagine. În figura [\ref{fig:coco}] se pot vedea câteva exemple.
+
+\begin{figure}[H]
+		\centering
+        \includegraphics[height=5cm, width=\textwidth]{coco}
+        \caption{Imagini din setul de date Microsoft COCO din 2014}
+        \label{fig:coco}
+\end{figure}
+
+\section{Rezultate și comparații}
+\begin{figure}[h]
+	\centering
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{style1}
+        \label{fig:anaoas_style1}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s1}
+        \label{fig:plfrtst_c1s1}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s1_stil}
+        \label{fig:plfrtst_c1s1_stil}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c2s1}
+        \label{fig:plfrtst_c2s1}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c2s1_stil}
+        \label{fig:plfrtst_c2s1_stil}
+	\end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{style6}
+        \label{fig:anaoas_style6}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s6}
+        \label{fig:plfrtst_c1s6}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s6_stil}
+        \label{fig:plfrtst_c1s6_stil}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c2s6}
+        \label{fig:plfrtst_c2s6}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c2s6_stil}
+        \label{fig:plfrtst_c2s6_stil}
+	\end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{style7}
+        \label{fig:anaoas_style7}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s7}
+        \label{fig:plfrtst_c1s7}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s7_stil}
+        \label{fig:plfrtst_c1s7_stil}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c2s7}
+        \label{fig:plfrtst_c2s7}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.19\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c2s7_stil}
+        \label{fig:plfrtst_c2s7_stil}
+	\end{subfigure}
+    \caption{Imagini de dimensiune $256$ $x$ $256$ pixeli}
+\end{figure}
+
+\newpage
+\begin{figure}[h]
+	\centering
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{style1}
+        \label{fig:anaoas_style1}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s1_high}
+        \label{fig:plfrtst_c1s1_high}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s1_high_stil}
+        \label{fig:plfrtst_c1s1_high_stil}
+	\end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{style6}
+        \label{fig:anaoas_style6}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s6_high}
+        \label{fig:plfrtst_c1s6_high}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s6_high_stil}
+        \label{fig:plfrtst_c1s6_high_stil}
+	\end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{style7}
+        \label{fig:anaoas_style7}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s7_high}
+        \label{fig:plfrtst_c1s7_high}
+	\end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+		\centering
+        \includegraphics[height=2.6cm, width=1\textwidth]{plfrtst_c1s7_high_stil}
+        \label{fig:plfrtst_c1s7_high_stil}
+	\end{subfigure}
+    \caption{Deși rețeaua a fost antrenată pe poze de dimensiune $256$ $x$ $256$ de pixeli se poate vedea în figura de mai sus că rețeaua se comportă bine și pe poze de dimensiune mai mare, imaginile din figură având dimensiunea de $512$ $x$ $512$ de pixeli.}
+\end{figure}
