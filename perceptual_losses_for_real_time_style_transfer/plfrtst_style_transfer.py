@@ -25,12 +25,12 @@ class StyleTransfer():
       content_layers=['relu4_2'],
       style_layers=['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-      alfa=100.0,
+      alfa=1000.0,
       beta=1.0,
-      gamma=0.001,
+      gamma=0.03,
       learning_rate=0.001,
       no_epochs=2,
-      batch_size=1):
+      batch_size=2):
     self.vgg_means = [103.939, 116.779, 123.68] # BGR
     self.model_name = model_name
     self.tensorflow_model_path = tensorflow_model_path
@@ -248,7 +248,7 @@ class StyleTransfer():
           print('Total variation loss', tv_loss)
           print('Total loss: ', out_loss)
 
-          if i % 500 == 0:
+          if i % 100 == 0:
             x_batch_transform_name = ut.next_batch_val(n_batch=1)
             x_batch_transform = []
             for x in x_batch_transform_name:
