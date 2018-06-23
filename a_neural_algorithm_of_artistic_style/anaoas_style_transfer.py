@@ -24,9 +24,9 @@ class StyleTransfer():
       content_layers=['relu4_2'],
       style_layers=['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1'],
       style_layers_w=[1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0],
-      alfa=1.0,
-      beta=100.0,
-      gamma=0.001,
+      alfa=100.0,
+      beta=1.0,
+      gamma=0.03,
       learning_rate=2,
       num_iters=2000,
       output_img_init='random'):
@@ -236,7 +236,7 @@ class StyleTransfer():
         print('Total variation loss: ', tv_loss)
         print('Total loss: ', out_loss)
 
-        if i % 100 == 0:
+        if i % 50 == 0:
           decoded_img = ut.denormalize_img(out_img[0])
           decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)
           sess.run(self.fwrite,
