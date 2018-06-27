@@ -2,6 +2,7 @@ import cv2
 import pickle
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 from utils import Utils
 try:
@@ -306,7 +307,8 @@ class StyleTransfer():
   def predict(self,
             content_img_path='images/content/content1.jpg',
             output_img_path='results/plfrtst_predict',
-            model_path='models/model_freeze.ckpt'):
+            model_path='models/model_freeze.ckpt',
+            show_img=None):
     saver = tf.train.Saver()
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
@@ -333,6 +335,11 @@ class StyleTransfer():
       sess.run(self.fwrite,
                feed_dict={self.decoded_img: decoded_img,
                           self.name_file: output_img_path + '/img.png'})
+
+      if show_img:
+            plt.axis("off")
+            plt.imshow(decoded_img)
+            plt.show()
 
       decoded_img = ut.denormalize_img(content_img[0], model='transform_net')
       decoded_img = cv2.cvtColor(decoded_img, cv2.COLOR_BGR2RGB)

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 from utils import Utils
 try:
@@ -183,7 +184,8 @@ class StyleTransfer():
             style_img_path='images/style/style1.jpg',
             noise_img_path='images/content/content1.jpg',
             output_img_path='results/anaoas',
-            tensorboard_path='tensorboard/tensorboard_anaoas'):
+            tensorboard_path='tensorboard/tensorboard_anaoas',
+            show_img=None):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       ut = Utils()
@@ -242,6 +244,11 @@ class StyleTransfer():
           sess.run(self.fwrite,
                    feed_dict={self.decoded_img: decoded_img,
                               self.name_file: output_img_path + '/img' + str(i) + '.png'})
+
+          if show_img:
+            plt.axis("off")
+            plt.imshow(decoded_img)
+            plt.show()
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,

@@ -4,6 +4,7 @@ import scipy.io as sio
 import tensorflow as tf
 from io import BytesIO
 from scipy.sparse import csr_matrix
+import matplotlib.pyplot as plt
 
 from utils import Utils
 try:
@@ -271,7 +272,8 @@ class StyleTransfer():
             mask_content_img_path='images/mask/mask_d_content6_resized.png',
             mask_style_img_path='images/mask/mask_d_style6_resized.png',
             output_img_path='results/dpst',
-            tensorboard_path='tensorboard/tensorboard_dpst'):
+            tensorboard_path='tensorboard/tensorboard_dpst',
+            show_img=None):
     summ = tf.summary.merge_all()
     with tf.Session() as sess:
       ut = Utils()
@@ -360,6 +362,11 @@ class StyleTransfer():
           sess.run(self.fwrite,
                    feed_dict={self.decoded_img: decoded_img,
                               self.name_file: output_img_path + '/img' + str(i) + '.png'})
+
+          if show_img:
+            plt.axis("off")
+            plt.imshow(decoded_img)
+            plt.show()
 
           s = sess.run(summ,
                        feed_dict={self.content_img: content_img,

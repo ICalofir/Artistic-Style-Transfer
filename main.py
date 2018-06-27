@@ -27,6 +27,9 @@ if __name__ == '__main__':
   parser.add_argument('--resume',
                       help='',
                       action='store_true')
+  parser.add_argument('--show_img',
+                      help='',
+                      action='store_true')
   parser.add_argument('--predict',
                       action='store_true')
   parser.add_argument('--model_name',
@@ -192,7 +195,8 @@ if __name__ == '__main__':
           style_img_path=style_img_path,
           noise_img_path=noise_img_path,
           output_img_path=output_img_path,
-          tensorboard_path=tensorboard_path)
+          tensorboard_path=tensorboard_path,
+          show_img=args.show_img)
     else:
       print('Nothing to be done!')
   elif args.method == 'plfrtst':
@@ -329,7 +333,8 @@ if __name__ == '__main__':
       model.predict(
           model_path=model_path,
           content_img_path=content_img_path,
-          output_img_path=output_img_path)
+          output_img_path=output_img_path,
+          show_img=args.show_img)
     else:
       print('Nothing to be done!')
   elif args.method == 'dpst':
@@ -412,7 +417,8 @@ if __name__ == '__main__':
           mask_style_img_path=args.mask_style_img_path \
                                   or 'images/mask/mask_d_style6_resized.png',
           output_img_path=output_img_path,
-          tensorboard_path=tensorboard_path)
+          tensorboard_path=tensorboard_path,
+          show_img=args.show_img)
     else:
       print('Nothing to be done!')
   else:
