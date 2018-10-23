@@ -7,4 +7,5 @@ My undergraduate thesis project. In this project I implemented style transfer by
 # Results
 ---
 ### A Neural Algorithm of Artistic Style
-<p><img src='images/results/anaoas_c1s1.png' /></p>
+### Deep Photo Style Transfer
+### Perceptual Losses for Real-Time Style Transfer and Super-Resolution
