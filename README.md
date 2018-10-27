@@ -82,3 +82,20 @@ My undergraduate thesis project. In this project I implemented style transfer by
 <img src='examples/mask/mask_d_style7.png' height='100' width='100' /></p>
 
 ### Perceptual Losses for Real-Time Style Transfer and Super-Resolution
+<p><img src='examples/style/style1.jpg' height='170' width='170' />
+<img src='examples/content/plfrtst_c1s1.jpg' height='170' width='170' />
+<img src='examples/result/plfrtst_c1s1_stil.png' height='170' width='170' />
+<img src='examples/content/plfrtst_c2s1.jpg' height='170' width='170' />
+<img src='examples/result/plfrtst_c2s1_stil.png' height='170' width='170' /></p>
+
+<p><img src='examples/style/style6.jpg' height='170' width='170' />
+<img src='examples/content/plfrtst_c1s6.png' height='170' width='170' />
+<img src='examples/result/plfrtst_c1s6_stil.png' height='170' width='170' />
+<img src='examples/content/plfrtst_c2s6.jpg' height='170' width='170' />
+<img src='examples/result/plfrtst_c2s6_stil.png' height='170' width='170' /></p>
+
+<p><img src='examples/style/style7.jpg' height='170' width='170' />
+<img src='examples/content/plfrtst_c1s7.png' height='170' width='170' />
+<img src='examples/result/plfrtst_c1s7_stil.png' height='170' width='170' />
+<img src='examples/content/plfrtst_c2s7.jpg' height='170' width='170' />
+<img src='examples/result/plfrtst_c2s7_stil.png' height='170' width='170' /></p>
