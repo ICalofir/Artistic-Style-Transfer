@@ -7,5 +7,8 @@ My undergraduate thesis project. In this project I implemented style transfer by
 # Results
 ---
 ### A Neural Algorithm of Artistic Style
+<p><img src='examples/content/content1.jpg' height='250' />
+<img src='examples/content/content2.jpg' height='250' /></p>
+
 ### Deep Photo Style Transfer
 ### Perceptual Losses for Real-Time Style Transfer and Super-Resolution
