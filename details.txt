@@ -1,0 +1,7 @@
+VGG pretrained weights:
+	Download from here: https://www.robots.ox.ac.uk/~vgg/research/very_deep/
+COCO dataset:
+	http://cocodataset.org/#download
+	- download 2014 Train images
+	- download 2014 Val images
+	- download 2014 Train/Val annotations
